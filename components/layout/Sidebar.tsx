@@ -31,7 +31,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile }) => {
-  const { activeTab, setActiveTab, tickets, unreadNotificationsCount, resetAllData, currentUser } = useApp();
+  const { activeTab, setActiveTab, tickets, unreadNotificationsCount, resetAllData } = useApp();
 
   const openTicketsCount = tickets.filter((t) => t.status !== 'concluido' && t.status !== 'cancelado').length;
 
@@ -119,18 +119,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile 
           <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-blue-300 border border-slate-700">
             PROTÓTIPO
           </span>
-        </div>
-
-        {/* Current user quick preview in sidebar */}
-        <div className="px-4 py-3 mx-3 my-2 rounded-lg bg-slate-800/60 border border-slate-800/90 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400">Usuário ativo:</span>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700/50">
-              {currentUser.role}
-            </span>
-          </div>
-          <div className="font-medium text-slate-100 mt-1 truncate">{currentUser.name}</div>
-          <div className="text-[11px] text-slate-400 truncate">{currentUser.department}</div>
         </div>
 
         {/* Scrollable Navigation */}
