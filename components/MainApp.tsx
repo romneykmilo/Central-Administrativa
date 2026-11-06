@@ -21,10 +21,16 @@ import { OperationsAndFacilitiesModule } from '@/components/modules/OperationsAn
 import { AdministrationModule } from '@/components/modules/AdministrationModule';
 
 export function MainApp() {
-  const { activeTab, toastMessage } = useApp();
+  const { activeTab, toastMessage, currentUser } = useApp();
   const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   const renderActiveModule = () => {
+    const restrictedTabs = ['documentos', 'pagamentos', 'admin', 'patrimonio', 'imoveis', 'obras', 'contratos'];
+    const canAccessManagement = currentUser.role === 'admin' || currentUser.role === 'manager';
+    if (restrictedTabs.includes(activeTab) && !canAccessManagement) {
+      return <HomePortal />;
+    }
+
     switch (activeTab) {
       case 'home':
         return <HomePortal />;
@@ -42,8 +48,6 @@ export function MainApp() {
         return <GEDAndContractsModule initialTab="documentos" />;
       case 'compras':
         return <PurchasesAndInventoryModule initialTab="compras" />;
-      case 'estoque':
-        return <PurchasesAndInventoryModule initialTab="estoque" />;
       case 'patrimonio':
         return <FacilitiesAndAssetsModule initialTab="patrimonio" />;
       case 'imoveis':
