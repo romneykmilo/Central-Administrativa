@@ -18,11 +18,9 @@ import {
   Building2,
   HardHat,
   PhoneCall,
-  Boxes,
   CreditCard,
   ShieldCheck,
   RotateCcw,
-  Sparkles,
   ChevronDown,
 } from 'lucide-react';
 
@@ -32,7 +30,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile }) => {
-  const { activeTab, setActiveTab, tickets, unreadNotificationsCount, resetAllData, currentUser } = useApp();
+  const { activeTab, setActiveTab, tickets, resetAllData, currentUser } = useApp();
   const [isManagementOpen, setIsManagementOpen] = useState(false);
   const canAccessManagement = currentUser.role === 'admin' || currentUser.role === 'manager';
 
