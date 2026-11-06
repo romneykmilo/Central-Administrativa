@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import {
   Home,
@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   RotateCcw,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,7 +32,9 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile }) => {
-  const { activeTab, setActiveTab, tickets, unreadNotificationsCount, resetAllData } = useApp();
+  const { activeTab, setActiveTab, tickets, unreadNotificationsCount, resetAllData, currentUser } = useApp();
+  const [isManagementOpen, setIsManagementOpen] = useState(false);
+  const canAccessManagement = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   const openTicketsCount = tickets.filter((t) => t.status !== 'concluido' && t.status !== 'cancelado').length;
 
@@ -46,37 +49,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile 
       ],
     },
     {
-      label: 'Operações & Facilities',
+      label: 'Serviços',
       items: [
         { id: 'logistica', label: 'Logística & Frotas', icon: Truck },
-        { id: 'atendimento', label: 'Atendimento & Copa', icon: Users },
+        { id: 'atendimento', label: 'Atendimento (Limpeza, copa e portaria)', icon: Users },
         { id: 'manutencao', label: 'Manutenção Predial', icon: Wrench },
-        { id: 'telefonia', label: 'Telefonia & Chips', icon: PhoneCall },
         { id: 'viagens', label: 'Viagens & Passagens', icon: Plane },
-      ],
-    },
-    {
-      label: 'Suprimentos & Contratos',
-      items: [
+        { id: 'telefonia', label: 'Telefonia & Celular', icon: PhoneCall },
         { id: 'compras', label: 'Compras Corporativas', icon: ShoppingBag },
-        { id: 'estoque', label: 'Estoque & Almoxarifado', icon: Boxes },
-        { id: 'contratos', label: 'Contratos Ativos', icon: FileCheck2 },
-        { id: 'documentos', label: 'Documentos & GED', icon: FileText },
-        { id: 'patrimonio', label: 'Patrimônio & Ativos', icon: Package },
-      ],
-    },
-    {
-      label: 'Infraestrutura & Finanças',
-      items: [
-        { id: 'imoveis', label: 'Imóveis & Aluguéis', icon: Building2 },
-        { id: 'obras', label: 'Obras & Nova Sede', icon: HardHat },
-        { id: 'pagamentos', label: 'Pagamentos & Contas', icon: CreditCard },
-      ],
-    },
-    {
-      label: 'Sistema',
-      items: [
-        { id: 'admin', label: 'Administração & Perfis', icon: ShieldCheck },
       ],
     },
   ];
@@ -163,6 +143,49 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile 
               </div>
             </div>
           ))}
+          {canAccessManagement && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setIsManagementOpen((open) => !open)}
+                aria-expanded={isManagementOpen}
+                className="w-full flex items-center justify-between px-3 mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-400 hover:text-slate-200"
+              >
+                <span>Gestão Administrativa</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isManagementOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isManagementOpen && (
+                <div className="space-y-0.5">
+                  {[
+                    { id: 'documentos', label: 'Documentos e GED', icon: FileText },
+                    { id: 'pagamentos', label: 'Pagamentos Administrativos', icon: CreditCard },
+                    { id: 'admin', label: 'Gestão Administrativa', icon: ShieldCheck },
+                    { id: 'patrimonio', label: 'Patrimônio e Ativos', icon: Package },
+                    { id: 'imoveis', label: 'Gestão de Imóveis', icon: Building2 },
+                    { id: 'obras', label: 'Obras e Reformas', icon: HardHat },
+                    { id: 'contratos', label: 'Contratos', icon: FileCheck2 },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleNavClick(item.id)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 pl-5 rounded-md text-xs font-medium transition-colors text-left ${
+                          isActive
+                            ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         {/* Footer Actions */}
