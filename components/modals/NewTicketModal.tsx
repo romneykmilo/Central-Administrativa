@@ -7,19 +7,11 @@ import { X, Clock, UploadCloud } from 'lucide-react';
 
 const servicesByCategory: Record<ServiceCategory, string[]> = {
   logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios & Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
-  atendimento: ['Limpeza & Higienização', 'Copa & Garçom', 'Vigilância & Portaria', 'Serviços Externos', 'Atendimento de Eventos'],
-  manutencao: ['Climatização e Ar-Condicionado', 'Instalações Elétricas', 'Hidráulica Predial', 'Reparo Civil / Mobiliário', 'Manutenção Preventiva'],
-  documentos: ['Solicitação de Contrato', 'Renovação de Alvará / Licença', 'Apólice de Seguro', 'Autenticação Cartorial', 'Digitalização GED'],
+  atendimento: ['Limpeza & Higienização', 'Copa & Garçom', 'Vigilância & Portaria', 'Serviços Externos', 'Atendimento de Eventos', 'Solicitações para Portaria'],
+  manutencao: ['Climatização e Ar-Condicionado', 'Instalações Elétricas', 'Hidráulica Predial', 'Reparo Civil', 'Manutenção de Mobiliário', 'Manutenção Preventiva', 'Mudança de Layout'],
   viagens: ['Passagens Aéreas', 'Reserva de Hotel / Hospedagem', 'Locação de Veículo para Viagem', 'Seguro Viagem', 'Adiantamento de Diárias'],
   telefonia: ['Solicitação de Linha Nova', 'Substituição de Aparelho Smartphone', 'Roaming Internacional', 'Chip Corporativo', 'Ramal / PABX'],
-  compras: ['Compra de Mobiliário', 'Materiais de Escritório', 'Equipamentos de Apoio', 'Suprimentos Especiais', 'Cotação Direta'],
-  pagamentos: ['Pagamento de Concessionária', 'Boleto Fornecedor', 'Taxa Municipal / Alvará', 'Reembolso Despesas'],
-  gestao: ['Atividade Administrativa', 'Auditoria Interna', 'Organização de Arquivo', 'Controle de Acesso'],
-  patrimonio: ['Transferência de Ativo', 'Tombamento / Plaqueta', 'Termo de Cautela', 'Baixa de Equipamento'],
-  imoveis: ['Vistoria de Imóvel', 'Contrato de Locação', 'Condomínio e IPTU', 'Manutenção Estrutural'],
-  obras: ['Reforma de Sala', 'Nova Sede Alphaville', 'Pintura e Piso', 'Adequação Elétrica CPD'],
-  contratos: ['Novo Contrato de Fornecedor', 'Renovação Contratual', 'Aditivo de Valor / Escopo', 'Rescisão Contratual'],
-  estoque: ['Reposição Papel Sulfite A4', 'Café e Açúcar Copa', 'Insumos de Limpeza', 'Toner e Cartuchos'],
+  compras: ['Cotação Direta'],
 };
 
 interface FormContentProps {
@@ -105,19 +97,12 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
               onChange={(e) => handleCategoryChange(e.target.value as ServiceCategory)}
               className="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="logistica">🚗 Logística & Frotas</option>
-              <option value="atendimento">👥 Atendimento, Limpeza & Copa</option>
-              <option value="manutencao">🔧 Manutenção Predial & Climatização</option>
-              <option value="viagens">✈️ Viagens & Passagens</option>
-              <option value="telefonia">📞 Telefonia & Celular</option>
-              <option value="compras">🛒 Compras Corporativas</option>
-              <option value="estoque">📦 Estoque & Almoxarifado</option>
-              <option value="documentos">📄 Documentos & GED</option>
-              <option value="contratos">📋 Contratos</option>
-              <option value="patrimonio">🏷️ Patrimônio & Ativos</option>
-              <option value="imoveis">🏢 Gestão de Imóveis</option>
-              <option value="obras">🏗️ Obras & Reformas</option>
-              <option value="pagamentos">💳 Pagamentos Administrativos</option>
+              <option value="logistica">Logística e Frotas</option>
+              <option value="atendimento">Atendimento (Limpeza, copa e portaria)</option>
+              <option value="manutencao">Manutenção Predial</option>
+              <option value="viagens">Viagens e Passagens</option>
+              <option value="telefonia">Telefonia e Celular</option>
+              <option value="compras">Compras Corporativas</option>
             </select>
           </div>
 
