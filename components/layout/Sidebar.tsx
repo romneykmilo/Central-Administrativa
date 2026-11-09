@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   RotateCcw,
   ChevronDown,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -158,6 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile 
                     { id: 'documentos', label: 'Documentos e GED', icon: FileText },
                     { id: 'pagamentos', label: 'Pagamentos Administrativos', icon: CreditCard },
                     { id: 'admin', label: 'Gestão Administrativa', icon: ShieldCheck },
+                    { id: 'configuracoes', label: 'Configurações', icon: SlidersHorizontal },
                     { id: 'patrimonio', label: 'Patrimônio e Ativos', icon: Package },
                     { id: 'imoveis', label: 'Gestão de Imóveis', icon: Building2 },
                     { id: 'obras', label: 'Obras e Reformas', icon: HardHat },
