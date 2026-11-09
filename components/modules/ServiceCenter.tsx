@@ -19,6 +19,7 @@ import {
   Layers,
   Sparkles,
   Download,
+  Settings,
 } from 'lucide-react';
 
 export const ServiceCenter: React.FC = () => {
@@ -28,6 +29,7 @@ export const ServiceCenter: React.FC = () => {
     openNewTicketWithPrefill,
     currentUser,
     availableUsers,
+    setActiveTab,
   } = useApp();
 
   const [activeView, setActiveView] = useState<'todos' | 'meus' | 'sla_painel' | 'aprovacoes'>('todos');
@@ -128,6 +130,12 @@ export const ServiceCenter: React.FC = () => {
             Gestão operacional, acompanhamento de chamados e conformidade de SLA
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        {(currentUser.role === 'admin' || currentUser.role === 'manager') && (
+          <button onClick={() => setActiveTab('configuracoes')} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
+            <Settings className="w-4 h-4" /> Configurações de SLA
+          </button>
+        )}
         <button
           onClick={() => openNewTicketWithPrefill()}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors shrink-0"
@@ -135,6 +143,7 @@ export const ServiceCenter: React.FC = () => {
           <Plus className="w-4 h-4" />
           <span>Abrir Novo Chamado</span>
         </button>
+        </div>
       </div>
 
       {/* Metrics Row */}
