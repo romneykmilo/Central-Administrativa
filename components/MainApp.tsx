@@ -19,13 +19,14 @@ import { PurchasesAndInventoryModule } from '@/components/modules/PurchasesAndIn
 import { FacilitiesAndAssetsModule } from '@/components/modules/FacilitiesAndAssetsModule';
 import { OperationsAndFacilitiesModule } from '@/components/modules/OperationsAndFacilitiesModule';
 import { AdministrationModule } from '@/components/modules/AdministrationModule';
+import { SettingsModule } from '@/components/modules/SettingsModule';
 
 export function MainApp() {
   const { activeTab, toastMessage, currentUser } = useApp();
   const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   const renderActiveModule = () => {
-    const restrictedTabs = ['documentos', 'pagamentos', 'admin', 'patrimonio', 'imoveis', 'obras', 'contratos'];
+    const restrictedTabs = ['documentos', 'pagamentos', 'admin', 'configuracoes', 'patrimonio', 'imoveis', 'obras', 'contratos'];
     const canAccessManagement = currentUser.role === 'admin' || currentUser.role === 'manager';
     if (restrictedTabs.includes(activeTab) && !canAccessManagement) {
       return <HomePortal />;
@@ -66,6 +67,8 @@ export function MainApp() {
         return <OperationsAndFacilitiesModule initialType="pagamentos" />;
       case 'admin':
         return <AdministrationModule />;
+      case 'configuracoes':
+        return <SettingsModule />;
       default:
         return <HomePortal />;
     }
