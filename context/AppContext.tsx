@@ -20,8 +20,10 @@ import {
   Vehicle,
   Waiter,
   Supplier,
+  ServiceSlaPolicy,
+  ServiceSlaChange,
 } from '@/types';
-import { getServiceSlaDays, addBusinessSlaDeadline } from '@/lib/mock-data';
+import { addBusinessSlaDeadline } from '@/lib/mock-data';
 import {
   MOCK_USERS,
   MOCK_TICKETS,
@@ -38,6 +40,7 @@ import {
   MOCK_WORKS,
   MOCK_PURCHASE_REQUESTS,
   MOCK_NOTIFICATIONS,
+  SERVICE_SLA_POLICIES,
 } from '@/lib/mock-data';
 
 interface AppContextType {
@@ -55,6 +58,9 @@ interface AppContextType {
 
   // Tickets & Services
   tickets: Ticket[];
+  serviceSlaPolicies: ServiceSlaPolicy[];
+  serviceSlaHistory: ServiceSlaChange[];
+  updateServiceSlaPolicy: (serviceName: string, changes: { businessDays?: number; active?: boolean }) => void;
   selectedTicket: Ticket | null;
   setSelectedTicketId: (id: string | null) => void;
   createTicket: (data: Partial<Ticket>) => Ticket;
@@ -138,6 +144,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return stored?.tickets || MOCK_TICKETS;
   });
 
+  const [serviceSlaPolicies, setServiceSlaPolicies] = useState<ServiceSlaPolicy[]>(() => {
+    const stored = getStoredData();
+    return stored?.serviceSlaPolicies || SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true }));
+  });
+  const [serviceSlaHistory, setServiceSlaHistory] = useState<ServiceSlaChange[]>(() => getStoredData()?.serviceSlaHistory || []);
+
   const [selectedTicketId, setSelectedTicketIdState] = useState<string | null>(null);
 
   const [schedules, setSchedules] = useState<ResourceSchedule[]>(() => {
@@ -185,6 +197,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const payload = {
         tickets,
+        serviceSlaPolicies,
+        serviceSlaHistory,
         schedules,
         contracts,
         inventory,
@@ -196,7 +210,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore
     }
-  }, [tickets, schedules, contracts, inventory, purchaseRequests, notifications, currentUser]);
+  }, [tickets, serviceSlaPolicies, serviceSlaHistory, schedules, contracts, inventory, purchaseRequests, notifications, currentUser]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -224,13 +238,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsNewTicketOpen(true);
   };
 
+  const updateServiceSlaPolicy = (serviceName: string, changes: { businessDays?: number; active?: boolean }) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') {
+      showToast('Apenas gestores podem alterar os prazos de SLA.');
+      return;
+    }
+    const current = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName);
+    if (!current) return;
+    const nextBusinessDays = changes.businessDays ?? current.businessDays;
+    if (!Number.isInteger(nextBusinessDays) || nextBusinessDays < 1 || nextBusinessDays > 365) {
+      showToast('Informe um prazo entre 1 e 365 dias úteis.');
+      return;
+    }
+    const nextActive = changes.active ?? current.active;
+    if (nextBusinessDays === current.businessDays && nextActive === current.active) return;
+    const change: ServiceSlaChange = {
+      id: `sla-${Date.now()}`,
+      serviceName,
+      previousBusinessDays: current.businessDays,
+      newBusinessDays: nextBusinessDays,
+      previousActive: current.active,
+      newActive: nextActive,
+      changedAt: new Date().toISOString(),
+      changedBy: currentUser.name,
+    };
+    setServiceSlaPolicies((prev) => prev.map((policy) => policy.serviceName === serviceName
+      ? { ...policy, businessDays: nextBusinessDays, active: nextActive }
+      : policy));
+    setServiceSlaHistory((prev) => [change, ...prev]);
+    showToast(`Configuração de SLA atualizada: ${serviceName}. Chamados existentes mantêm o prazo original.`);
+  };
+
   const createTicket = (data: Partial<Ticket>): Ticket => {
     const nextNumber = tickets.length + 1025;
     const now = new Date();
     const nowIso = now.toISOString();
     const priority = data.priority || 'media';
     const serviceName = data.serviceName || 'Solicitação Geral';
-    const slaBusinessDays = getServiceSlaDays(serviceName);
+    const slaPolicy = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active);
+    const slaBusinessDays = slaPolicy?.businessDays;
     const hours = slaBusinessDays ? slaBusinessDays * 10 : 0;
     const deadline = slaBusinessDays ? addBusinessSlaDeadline(now, slaBusinessDays).toISOString() : '';
 
@@ -444,6 +490,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Ignore
     }
     setTickets(MOCK_TICKETS);
+    setServiceSlaPolicies(SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true })));
+    setServiceSlaHistory([]);
     setSchedules(MOCK_SCHEDULES);
     setContracts(MOCK_CONTRACTS);
     setInventory(MOCK_INVENTORY);
@@ -469,6 +517,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         subTab,
         setSubTab,
         tickets,
+        serviceSlaPolicies,
+        serviceSlaHistory,
+        updateServiceSlaPolicy,
         selectedTicket,
         setSelectedTicketId,
         createTicket,
