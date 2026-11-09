@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { TicketStatus, TicketPriority } from '@/types';
+import { getBusinessMinutesBetween } from '@/lib/mock-data';
 import {
   X,
   Clock,
@@ -37,40 +38,34 @@ export const TicketDetailModal: React.FC = () => {
 
   if (!selectedTicket) return null;
 
-  // SLA Calculation
-  const now = nowTimestamp;
-  const createdTime = new Date(selectedTicket.createdAt).getTime();
-  const deadlineTime = new Date(selectedTicket.slaDeadline).getTime();
-  const totalDuration = deadlineTime - createdTime;
-  const elapsed = now - createdTime;
-
+  // Para chamados novos, o acompanhamento considera apenas o horário útil.
+  const now = new Date(nowTimestamp);
+  const createdAt = new Date(selectedTicket.createdAt);
+  const deadlineAt = selectedTicket.slaDeadline ? new Date(selectedTicket.slaDeadline) : new Date(Number.NaN);
+  const usesBusinessCalendar = Boolean(selectedTicket.slaBusinessDays);
+  const totalDuration = usesBusinessCalendar ? (selectedTicket.slaBusinessDays || 0) * 600 : (deadlineAt.getTime()-createdAt.getTime())/60000;
+  const elapsed = usesBusinessCalendar ? getBusinessMinutesBetween(createdAt,now) : (now.getTime()-createdAt.getTime())/60000;
+  const remaining = usesBusinessCalendar ? getBusinessMinutesBetween(now,deadlineAt) : (deadlineAt.getTime()-now.getTime())/60000;
   let slaStatus: 'ok' | 'warning' | 'breached' | 'completed' = 'ok';
   let slaRemainingLabel = '';
   let slaPercent = 0;
-
   if (selectedTicket.status === 'concluido') {
-    slaStatus = 'completed';
-    slaRemainingLabel = 'Concluído no prazo';
-    slaPercent = 100;
+    slaStatus = 'completed'; slaRemainingLabel = 'Concluído no prazo'; slaPercent = 100;
   } else if (selectedTicket.status === 'cancelado') {
-    slaStatus = 'completed';
-    slaRemainingLabel = 'Chamado cancelado';
-    slaPercent = 0;
-  } else if (now > deadlineTime) {
+    slaStatus = 'completed'; slaRemainingLabel = 'Chamado cancelado'; slaPercent = 0;
+  } else if (!selectedTicket.slaDeadline) {
+    slaStatus = 'ok'; slaRemainingLabel = 'SLA não cadastrado'; slaPercent = 0;
+  } else if (remaining < 0) {
     slaStatus = 'breached';
-    const hoursOver = Math.round((now - deadlineTime) / 3600000);
-    slaRemainingLabel = `SLA Vencido há ${hoursOver > 0 ? hoursOver + 'h' : 'alguns minutos'}`;
+    slaRemainingLabel = `SLA vencido há ${Math.ceil(Math.abs(remaining)/60)}h úteis`;
     slaPercent = 100;
   } else {
-    const hoursLeft = Math.round((deadlineTime - now) / 3600000);
-    slaPercent = Math.min(100, Math.round((elapsed / totalDuration) * 100));
-
+    const hoursLeft = Math.ceil(remaining/60);
+    slaPercent = totalDuration > 0 ? Math.min(100,Math.round((elapsed/totalDuration)*100)) : 0;
     if (hoursLeft <= 3) {
-      slaStatus = 'warning';
-      slaRemainingLabel = `Crítico: resta apenas ${hoursLeft}h`;
+      slaStatus = 'warning'; slaRemainingLabel = `Crítico: restam ${hoursLeft}h úteis`;
     } else {
-      slaStatus = 'ok';
-      slaRemainingLabel = `Dentro do prazo: restam ${hoursLeft}h`;
+      slaStatus = 'ok'; slaRemainingLabel = `Dentro do prazo: restam ${hoursLeft}h úteis`;
     }
   }
 
@@ -143,7 +138,7 @@ export const TicketDetailModal: React.FC = () => {
               </span>
             </div>
             <div className="text-slate-500 text-[11px] font-mono" suppressHydrationWarning>
-              Prazo limite: {new Date(selectedTicket.slaDeadline).toLocaleString('pt-BR')} (SLA total {selectedTicket.slaTotalHours}h)
+              Prazo limite: {selectedTicket.slaDeadline ? new Date(selectedTicket.slaDeadline).toLocaleString('pt-BR') : 'Não definido'} ({selectedTicket.slaBusinessDays ? `${selectedTicket.slaBusinessDays} dias úteis` : `SLA total ${selectedTicket.slaTotalHours}h`})
             </div>
           </div>
 
