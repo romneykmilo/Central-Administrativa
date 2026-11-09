@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { SERVICE_SLA_POLICIES } from '@/lib/mock-data';
 import {
   ShieldCheck,
   Users,
@@ -19,13 +20,6 @@ export const AdministrationModule: React.FC = () => {
   const { availableUsers, currentUser, switchUserRole, resetAllData } = useApp();
 
   const [activeTab, setActiveTab] = useState<'usuarios' | 'permissoes' | 'sla' | 'auth'>('usuarios');
-
-  const slaPolicies = [
-    { priority: 'Crítica', maxHours: 4, description: 'Interrupção operacional grave, risco à segurança ou diretoria', color: 'red' },
-    { priority: 'Alta', maxHours: 12, description: 'Equipamentos centrais, motoboy urgente, viagens de emergência', color: 'amber' },
-    { priority: 'Média', maxHours: 24, description: 'Demandas padrão de facilities, compras rotineiras e chips', color: 'blue' },
-    { priority: 'Baixa', maxHours: 48, description: 'Pequenos reparos, solicitações com antecedência programada', color: 'slate' },
-  ];
 
   const permissionsMatrix = [
     { feature: 'Abrir Chamados e Solicitar Serviços', requester: true, attendant: true, manager: true, admin: true },
@@ -198,29 +192,31 @@ export const AdministrationModule: React.FC = () => {
       {/* SLA TAB */}
       {activeTab === 'sla' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {slaPolicies.map((p) => (
-              <div key={p.priority} className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-900 text-sm">Prioridade {p.priority}</span>
-                  <span
-                    className={`font-mono font-bold text-xs px-2 py-0.5 rounded ${
-                      p.color === 'red'
-                        ? 'bg-red-100 text-red-800'
-                        : p.color === 'amber'
-                        ? 'bg-amber-100 text-amber-800'
-                        : p.color === 'blue'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    Até {p.maxHours}h
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed">{p.description}</p>
-                <div className="pt-2 text-[11px] font-mono text-slate-400">Tempo de Resposta Alvo: 100%</div>
-              </div>
-            ))}
+          <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900">
+            <div className="font-semibold">Regra de contagem dos prazos</div>
+            <p className="mt-1">Segunda a sexta-feira, das 08h às 18h, excluindo feriados nacionais e feriados municipais de Belo Horizonte. Cada dia útil corresponde a 10 horas de expediente.</p>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100">
+              <h3 className="text-sm font-semibold text-slate-900">Prazos de atendimento por serviço</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Prazos definidos para os 29 serviços disponíveis aos solicitantes.</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead><tr className="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px]">
+                  <th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3 text-right">Prazo</th>
+                </tr></thead>
+                <tbody className="divide-y divide-slate-100">
+                  {SERVICE_SLA_POLICIES.map((policy) => (
+                    <tr key={policy.serviceName}>
+                      <td className="px-4 py-2.5 text-slate-500">{policy.category}</td>
+                      <td className="px-4 py-2.5 font-medium text-slate-800">{policy.serviceName}</td>
+                      <td className="px-4 py-2.5 text-right font-semibold text-slate-900">{policy.businessDays} {policy.businessDays === 1 ? 'dia útil' : 'dias úteis'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
