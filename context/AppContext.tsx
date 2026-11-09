@@ -21,6 +21,7 @@ import {
   Waiter,
   Supplier,
 } from '@/types';
+import { getServiceSlaDays, addBusinessSlaDeadline } from '@/lib/mock-data';
 import {
   MOCK_USERS,
   MOCK_TICKETS,
@@ -225,10 +226,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createTicket = (data: Partial<Ticket>): Ticket => {
     const nextNumber = tickets.length + 1025;
-    const nowIso = new Date().toISOString();
+    const now = new Date();
+    const nowIso = now.toISOString();
     const priority = data.priority || 'media';
-    const hours = priority === 'critica' ? 4 : priority === 'alta' ? 12 : priority === 'media' ? 24 : 48;
-    const deadline = new Date(Date.now() + hours * 3600000).toISOString();
+    const serviceName = data.serviceName || 'Solicitação Geral';
+    const slaBusinessDays = getServiceSlaDays(serviceName);
+    const hours = slaBusinessDays ? slaBusinessDays * 10 : 0;
+    const deadline = slaBusinessDays ? addBusinessSlaDeadline(now, slaBusinessDays).toISOString() : '';
 
     const newTicket: Ticket = {
       id: `t-${nextNumber}`,
@@ -236,7 +240,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       title: data.title || 'Chamado Administrativo',
       description: data.description || '',
       category: data.category || 'atendimento',
-      serviceName: data.serviceName || 'Solicitação Geral',
+      serviceName,
       priority,
       status: 'novo',
       requesterId: currentUser.id,
@@ -245,6 +249,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createdAt: nowIso,
       slaDeadline: deadline,
       slaTotalHours: hours,
+      slaBusinessDays,
       location: data.location || 'Sede Administrativa',
       costEstimate: data.costEstimate,
       comments: [],
