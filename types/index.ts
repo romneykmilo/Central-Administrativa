@@ -74,6 +74,7 @@ export interface Ticket {
   createdAt: string;
   slaDeadline: string; // ISO date string
   slaTotalHours: number;
+  slaBusinessDays?: number;
   completedAt?: string;
   location?: string;
   costEstimate?: number;
