@@ -42,9 +42,11 @@ export const DashboardView: React.FC = () => {
   if (period === 'semana') {
     rangeStart.setDate(rangeStart.getDate() - 6);
     rangeStart.setHours(0, 0, 0, 0);
+    rangeEnd.setHours(23, 59, 59, 999);
   } else if (period === 'mes') {
     rangeStart.setDate(1);
     rangeStart.setHours(0, 0, 0, 0);
+    rangeEnd.setHours(23, 59, 59, 999);
   } else if (period === 'anterior') {
     rangeStart.setDate(1);
     rangeStart.setMonth(rangeStart.getMonth() - 1);
