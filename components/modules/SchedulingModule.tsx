@@ -26,6 +26,8 @@ export const SchedulingModule: React.FC = () => {
   const [tripRequesterName, setTripRequesterName] = useState(currentUser.name);
   const [costCenter, setCostCenter] = useState(currentUser.department || '');
   const [passengerName, setPassengerName] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
   const [startDate, setStartDate] = useState(dateKey(new Date()));
   const [startTime, setStartTime] = useState('08:00');
   const [dropoffDate, setDropoffDate] = useState(dateKey(new Date()));
@@ -53,6 +55,8 @@ export const SchedulingModule: React.FC = () => {
     setTripRequesterName(currentUser.name);
     setCostCenter(currentUser.department || '');
     setPassengerName('');
+    setOrigin('');
+    setDestination('');
     setStartDate(dateKey(currentDate));
     setDropoffDate(dateKey(currentDate));
     setStartTime('08:00');
@@ -100,7 +104,7 @@ export const SchedulingModule: React.FC = () => {
       department: currentUser.department,
       startDateTime: start.toISOString(),
       endDateTime: end.toISOString(),
-      location: location || 'A definir',
+      location: isDriverBooking ? `${origin} → ${destination}` : (location || 'A definir'),
       passengersOrGuests: isDriverBooking ? 1 : undefined,
       notes,
       status: 'confirmado',
@@ -112,6 +116,8 @@ export const SchedulingModule: React.FC = () => {
         tripRequesterName,
         costCenter,
         passengerName,
+        origin,
+        destination,
         tripMode,
         passengerDropoffDateTime: localDateTime(dropoffDate, dropoffTime).toISOString(),
         waitingUntil: tripMode === 'aguardar' ? end.toISOString() : undefined,
@@ -302,9 +308,16 @@ export const SchedulingModule: React.FC = () => {
                 </label> : <p className="text-xs text-slate-600">O motorista e o veículo ficarão bloqueados por mais 40 minutos após o desembarque, para permitir o retorno.</p>}
                 <p className="text-xs font-medium text-slate-700">Disponibilidade prevista até: {bookingEnd.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</p>
               </div>}
-              <label className="block text-xs font-semibold text-slate-700">Origem e destino / local *
-                <input required value={location} onChange={e => setLocation(e.target.value)} placeholder="Ex.: Sede → Aeroporto" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-              </label>
+              {resourceType === 'motorista' ? <div className="grid gap-3 sm:grid-cols-2">
+                <label className="text-xs font-semibold text-slate-700">Local de origem *
+                  <input required value={origin} onChange={e => setOrigin(e.target.value)} placeholder="Endereço de saída" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
+                </label>
+                <label className="text-xs font-semibold text-slate-700">Destino *
+                  <input required value={destination} onChange={e => setDestination(e.target.value)} placeholder="Endereço de destino" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
+                </label>
+              </div> : <label className="block text-xs font-semibold text-slate-700">Local *
+                <input required value={location} onChange={e => setLocation(e.target.value)} placeholder="Local da reserva" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
+              </label>}
               <label className="block text-xs font-semibold text-slate-700">Observações
                 <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
               </label>
