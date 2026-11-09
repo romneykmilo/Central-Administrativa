@@ -51,8 +51,8 @@ export const ServiceCenter: React.FC = () => {
         ? getBusinessMinutesBetween(now, deadline)
         : (deadline.getTime()-nowTimestamp)/60000;
       const remainingHours = Math.ceil(Math.abs(remainingMinutes)/60);
-      if (remainingMinutes < 0) {
-        return { status: 'vencido', label: `Vencido (${remainingHours}h úteis)`, color: 'red' };
+      if (remainingMinutes < 0 || now.getTime() > deadline.getTime()) {
+        return { status: 'vencido', label: remainingHours > 0 ? `Vencido (${remainingHours}h úteis)` : 'Vencido', color: 'red' };
       } else if (remainingHours <= 3) {
         return { status: 'critico', label: `Restam ${remainingHours}h úteis (Crítico)`, color: 'amber' };
       }
