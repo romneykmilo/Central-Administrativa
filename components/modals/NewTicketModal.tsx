@@ -54,7 +54,11 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
   const slaDays = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active)?.businessDays;
 
   React.useEffect(() => {
-    if (activeServices.length > 0 && !activeServices.includes(serviceName)) setServiceName(activeServices[0]);
+    if (activeServices.length === 0) {
+      if (serviceName) setServiceName('');
+    } else if (!activeServices.includes(serviceName)) {
+      setServiceName(activeServices[0]);
+    }
   }, [category, serviceSlaPolicies, serviceName]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -246,7 +250,8 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
           </button>
           <button
             type="submit"
-            className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs"
+            disabled={!serviceName || activeServices.length === 0}
+            className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Registrar Chamado
           </button>
