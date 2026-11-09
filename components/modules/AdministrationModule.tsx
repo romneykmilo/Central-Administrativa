@@ -30,7 +30,7 @@ export const AdministrationModule: React.FC = () => {
     { feature: 'Acessar Dashboard Executivo', requester: false, attendant: true, manager: true, admin: true },
     { feature: 'Cadastrar e Alterar Contratos / GED', requester: false, attendant: true, manager: true, admin: true },
     { feature: 'Configuração de Usuários e Permissões', requester: false, attendant: false, manager: false, admin: true },
-    { feature: 'Parametrização de Políticas de SLA', requester: false, attendant: false, manager: false, admin: true },
+    { feature: 'Parametrização de Políticas de SLA', requester: false, attendant: false, manager: true, admin: true },
   ];
 
   return (
