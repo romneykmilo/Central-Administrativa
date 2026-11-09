@@ -404,23 +404,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createSchedule = (scheduleData: Omit<ResourceSchedule, 'id'>) => {
-    // Conflict check
     const startA = new Date(scheduleData.startDateTime).getTime();
     const endA = new Date(scheduleData.endDateTime).getTime();
+    const requestedResourceIds = [scheduleData.resourceId, scheduleData.driverId, scheduleData.vehicleId].filter(Boolean) as string[];
 
     const conflict = schedules.find((s) => {
       if (s.status === 'cancelado') return false;
-      if (s.resourceId !== scheduleData.resourceId) return false;
+      const existingResourceIds = [s.resourceId, s.driverId, s.vehicleId].filter(Boolean) as string[];
+      if (!requestedResourceIds.some((id) => existingResourceIds.includes(id))) return false;
       const startB = new Date(s.startDateTime).getTime();
       const endB = new Date(s.endDateTime).getTime();
-      // Overlap condition
       return startA < endB && endA > startB;
     });
 
     if (conflict) {
       return {
         success: false,
-        conflict: `Conflito de horário detectado: O recurso "${scheduleData.resourceName}" já possui o agendamento "${conflict.title}" reservado no período selecionado.`,
+        conflict: `Conflito de horário: motorista ou veículo já está reservado no agendamento "${conflict.title}".`,
       };
     }
 
