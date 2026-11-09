@@ -32,17 +32,47 @@ export const DashboardView: React.FC = () => {
     setActiveTab,
   } = useApp();
 
-  const [period, setPeriod] = useState<'semana' | 'mes' | 'ano'>('mes');
+  const [period, setPeriod] = useState<'semana' | 'mes' | 'anterior' | 'ano'>('mes');
   const [nowTimestamp] = useState(() => Date.now());
 
-  // Metrics
-  const openTickets = tickets.filter((t) => t.status !== 'concluido' && t.status !== 'cancelado');
-  const inProgressTickets = tickets.filter((t) => t.status === 'em_andamento');
-  const overdueTickets = tickets.filter((t) => {
-    if (t.status === 'concluido' || t.status === 'cancelado') return false;
+  // Todos os indicadores de chamados respeitam o período selecionado.
+  const now = new Date(nowTimestamp);
+  const rangeStart = new Date(now);
+  const rangeEnd = new Date(now);
+  if (period === 'semana') {
+    rangeStart.setDate(rangeStart.getDate() - 6);
+    rangeStart.setHours(0, 0, 0, 0);
+  } else if (period === 'mes') {
+    rangeStart.setDate(1);
+    rangeStart.setHours(0, 0, 0, 0);
+  } else if (period === 'anterior') {
+    rangeStart.setDate(1);
+    rangeStart.setMonth(rangeStart.getMonth() - 1);
+    rangeStart.setHours(0, 0, 0, 0);
+    rangeEnd.setDate(0);
+    rangeEnd.setHours(23, 59, 59, 999);
+  } else {
+    rangeStart.setFullYear(2026, 0, 1);
+    rangeStart.setHours(0, 0, 0, 0);
+    rangeEnd.setFullYear(2026, 11, 31);
+    rangeEnd.setHours(23, 59, 59, 999);
+  }
+  const periodTickets = tickets.filter((ticket) => {
+    const createdAt = new Date(ticket.createdAt).getTime();
+    return createdAt >= rangeStart.getTime() && createdAt <= rangeEnd.getTime();
+  });
+  const openTickets = periodTickets.filter((t) => t.status !== 'concluido' && t.status !== 'cancelado');
+  const inProgressTickets = periodTickets.filter((t) => t.status === 'em_andamento');
+  const overdueTickets = periodTickets.filter((t) => {
+    if (t.status === 'concluido' || t.status === 'cancelado' || !t.slaDeadline) return false;
     return new Date(t.slaDeadline).getTime() < nowTimestamp;
   });
-  const completedTickets = tickets.filter((t) => t.status === 'concluido');
+  const completedTickets = periodTickets.filter((t) => t.status === 'concluido');
+  const completedWithKnownSla = completedTickets.filter((ticket) => ticket.slaDeadline && ticket.completedAt);
+  const completedWithinSla = completedWithKnownSla.filter((ticket) => new Date(ticket.completedAt as string).getTime() <= new Date(ticket.slaDeadline).getTime());
+  const serviceEfficiency = completedWithKnownSla.length
+    ? Math.round((completedWithinSla.length / completedWithKnownSla.length) * 100)
+    : null;
   const awaitingApproval = purchaseRequests.filter((p) => p.status === 'aguardando_aprovacao');
   const contractsExpiringSoon = contracts.filter((c) => c.status === 'vencendo');
   const lowStockItems = inventory.filter((i) => i.currentStock <= i.minStock);
@@ -51,7 +81,7 @@ export const DashboardView: React.FC = () => {
 
   // Breakdown by Category
   const categoryCounts: Record<string, number> = {};
-  tickets.forEach((t) => {
+  periodTickets.forEach((t) => {
     categoryCounts[t.category] = (categoryCounts[t.category] || 0) + 1;
   });
 
@@ -60,11 +90,11 @@ export const DashboardView: React.FC = () => {
 
   // Status breakdown
   const statusCounts = {
-    novo: tickets.filter((t) => t.status === 'novo').length,
-    em_analise: tickets.filter((t) => t.status === 'em_analise').length,
-    em_andamento: tickets.filter((t) => t.status === 'em_andamento').length,
-    agendado: tickets.filter((t) => t.status === 'agendado').length,
-    aguardando: tickets.filter((t) => t.status === 'aguardando_info' || t.status === 'aguardando_aprovacao').length,
+    novo: periodTickets.filter((t) => t.status === 'novo').length,
+    em_analise: periodTickets.filter((t) => t.status === 'em_analise').length,
+    em_andamento: periodTickets.filter((t) => t.status === 'em_andamento').length,
+    agendado: periodTickets.filter((t) => t.status === 'agendado').length,
+    aguardando: periodTickets.filter((t) => t.status === 'aguardando_info' || t.status === 'aguardando_aprovacao').length,
     concluido: completedTickets.length,
   };
 
@@ -106,6 +136,12 @@ export const DashboardView: React.FC = () => {
             }`}
           >
             Mês Atual
+          </button>
+          <button
+            onClick={() => setPeriod('anterior')}
+            className={`px-3 py-1 font-medium rounded-md transition-colors ${period === 'anterior' ? 'bg-white text-slate-900 shadow-2xs font-semibold' : 'text-slate-600 hover:text-slate-900'}`}
+          >
+            Mês Anterior
           </button>
           <button
             onClick={() => setPeriod('ano')}
@@ -198,7 +234,7 @@ export const DashboardView: React.FC = () => {
       </div>
 
       {/* Main KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
           <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Abertos</span>
           <div className="text-xl sm:text-2xl font-bold text-slate-900 font-mono mt-1 tabular-nums">{openTickets.length}</div>
@@ -215,6 +251,12 @@ export const DashboardView: React.FC = () => {
           <span className="text-[10px] uppercase font-semibold text-emerald-600 tracking-wider">Concluídos</span>
           <div className="text-xl sm:text-2xl font-bold text-emerald-600 font-mono mt-1 tabular-nums">{completedTickets.length}</div>
           <span className="text-[11px] text-slate-400">No período</span>
+        </div>
+
+        <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
+          <span className="text-[10px] uppercase font-semibold text-violet-600 tracking-wider">Eficiência no Atendimento</span>
+          <div className="text-xl sm:text-2xl font-bold text-violet-600 font-mono mt-1 tabular-nums">{serviceEfficiency === null ? '—' : `${serviceEfficiency}%`}</div>
+          <span className="text-[11px] text-slate-400">{completedWithinSla.length} de {completedWithKnownSla.length} concluídos com SLA registrado</span>
         </div>
 
         <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs">
@@ -245,12 +287,12 @@ export const DashboardView: React.FC = () => {
               <h3 className="text-sm font-semibold text-slate-900">Demandas por Categoria</h3>
               <p className="text-xs text-slate-500">Distribuição de chamados nos módulos da empresa</p>
             </div>
-            <span className="text-xs font-mono font-medium text-slate-400">Total: {tickets.length}</span>
+            <span className="text-xs font-mono font-medium text-slate-400">Total: {periodTickets.length}</span>
           </div>
 
           <div className="space-y-3">
             {categoriesSorted.slice(0, 6).map(([cat, count]) => {
-              const pct = Math.round((count / tickets.length) * 100);
+              const pct = Math.round((count / periodTickets.length) * 100);
               return (
                 <div key={cat} className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-medium">
