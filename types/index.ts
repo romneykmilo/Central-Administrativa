@@ -95,11 +95,21 @@ export interface ResourceSchedule {
   requesterName: string;
   department: string;
   startDateTime: string; // ISO string
-  endDateTime: string;   // ISO string
+  endDateTime: string;   // ISO string: fim do bloqueio do recurso
   location: string;
   passengersOrGuests?: number;
   notes?: string;
   status: 'confirmado' | 'pendente' | 'cancelado';
+  driverId?: string;
+  driverName?: string;
+  vehicleId?: string;
+  vehicleName?: string;
+  tripRequesterName?: string;
+  costCenter?: string;
+  passengerName?: string;
+  tripMode?: 'aguardar' | 'somente_levar';
+  passengerDropoffDateTime?: string;
+  waitingUntil?: string;
 }
 
 export interface Driver {
