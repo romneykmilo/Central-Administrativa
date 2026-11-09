@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { SERVICE_SLA_POLICIES } from '@/lib/mock-data';
 import {
   ShieldCheck,
   Users,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const AdministrationModule: React.FC = () => {
-  const { availableUsers, currentUser, switchUserRole, resetAllData } = useApp();
+  const { availableUsers, currentUser, switchUserRole, resetAllData, serviceSlaPolicies } = useApp();
 
   const [activeTab, setActiveTab] = useState<'usuarios' | 'permissoes' | 'sla' | 'auth'>('usuarios');
 
@@ -199,19 +198,20 @@ export const AdministrationModule: React.FC = () => {
           <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100">
               <h3 className="text-sm font-semibold text-slate-900">Prazos de atendimento por serviço</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Prazos definidos para os 29 serviços disponíveis aos solicitantes.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Prazos atuais dos serviços, conforme cadastro em Configurações.</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead><tr className="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px]">
-                  <th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3 text-right">Prazo</th>
+                  <th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3 text-right">Prazo</th><th className="px-4 py-3 text-center">Status</th>
                 </tr></thead>
                 <tbody className="divide-y divide-slate-100">
-                  {SERVICE_SLA_POLICIES.map((policy) => (
+                  {serviceSlaPolicies.map((policy) => (
                     <tr key={policy.serviceName}>
                       <td className="px-4 py-2.5 text-slate-500">{policy.category}</td>
                       <td className="px-4 py-2.5 font-medium text-slate-800">{policy.serviceName}</td>
                       <td className="px-4 py-2.5 text-right font-semibold text-slate-900">{policy.businessDays} {policy.businessDays === 1 ? 'dia útil' : 'dias úteis'}</td>
+                      <td className="px-4 py-2.5 text-center"><span className={policy.active ? 'text-emerald-700' : 'text-slate-400'}>{policy.active ? 'Ativo' : 'Inativo'}</span></td>
                     </tr>
                   ))}
                 </tbody>
