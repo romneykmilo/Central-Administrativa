@@ -55,9 +55,10 @@ export const TicketDetailModal: React.FC = () => {
     slaStatus = 'completed'; slaRemainingLabel = 'Chamado cancelado'; slaPercent = 0;
   } else if (!selectedTicket.slaDeadline) {
     slaStatus = 'ok'; slaRemainingLabel = 'SLA não cadastrado'; slaPercent = 0;
-  } else if (remaining < 0) {
+  } else if (remaining < 0 || now.getTime() > deadlineAt.getTime()) {
     slaStatus = 'breached';
-    slaRemainingLabel = `SLA vencido há ${Math.ceil(Math.abs(remaining)/60)}h úteis`;
+    const overdueHours = Math.ceil(Math.abs(remaining)/60);
+    slaRemainingLabel = overdueHours > 0 ? `SLA vencido há ${overdueHours}h úteis` : 'SLA vencido';
     slaPercent = 100;
   } else {
     const hoursLeft = Math.ceil(remaining/60);
