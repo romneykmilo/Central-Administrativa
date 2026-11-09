@@ -252,3 +252,22 @@ export interface NotificationItem {
   type: 'info' | 'warning' | 'alert' | 'success';
   linkTarget?: { tab: string; subTab?: string; ticketId?: string };
 }
+
+
+export interface ServiceSlaPolicy {
+  category: string;
+  serviceName: string;
+  businessDays: number;
+  active: boolean;
+}
+
+export interface ServiceSlaChange {
+  id: string;
+  serviceName: string;
+  previousBusinessDays: number;
+  newBusinessDays: number;
+  previousActive: boolean;
+  newActive: boolean;
+  changedAt: string;
+  changedBy: string;
+}
