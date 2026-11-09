@@ -107,6 +107,8 @@ export interface ResourceSchedule {
   tripRequesterName?: string;
   costCenter?: string;
   passengerName?: string;
+  origin?: string;
+  destination?: string;
   tripMode?: 'aguardar' | 'somente_levar';
   passengerDropoffDateTime?: string;
   waitingUntil?: string;
