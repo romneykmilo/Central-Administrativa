@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ServiceCategory, TicketPriority, Ticket } from '@/types';
 import { X, Clock, UploadCloud } from 'lucide-react';
+import { getServiceSlaDays } from '@/lib/mock-data';
 
 const servicesByCategory: Partial<Record<ServiceCategory, string[]>> = {
   logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios & Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
@@ -50,7 +51,7 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
     setAttachedFiles((prev) => [...prev, mockFile]);
   };
 
-  const slaHours = priority === 'critica' ? 4 : priority === 'alta' ? 12 : priority === 'media' ? 24 : 48;
+  const slaDays = getServiceSlaDays(serviceName);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,15 +156,15 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
               <label className="text-xs font-semibold text-slate-700">Prioridade</label>
               <span className="text-[11px] text-slate-500 flex items-center gap-1 font-mono">
                 <Clock className="w-3 h-3 text-slate-400" />
-                SLA Máximo: {slaHours}h
+                {slaDays ? `Prazo de atendimento: ${slaDays} ${slaDays === 1 ? 'dia útil' : 'dias úteis'}` : 'SLA não cadastrado'}
               </span>
             </div>
             <div className="grid grid-cols-4 gap-1.5">
               {[
-                { id: 'baixa', label: 'Baixa', hours: '48h' },
-                { id: 'media', label: 'Média', hours: '24h' },
-                { id: 'alta', label: 'Alta', hours: '12h' },
-                { id: 'critica', label: 'Crítica', hours: '4h' },
+                { id: 'baixa', label: 'Baixa' },
+                { id: 'media', label: 'Média' },
+                { id: 'alta', label: 'Alta' },
+                { id: 'critica', label: 'Crítica' },
               ].map((p) => {
                 const isSelected = priority === p.id;
                 return (
@@ -178,7 +179,6 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
                     }`}
                   >
                     <div>{p.label}</div>
-                    <div className="text-[10px] font-normal opacity-80">{p.hours}</div>
                   </button>
                 );
               })}
