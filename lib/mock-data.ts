@@ -938,3 +938,113 @@ export const MOCK_NOTIFICATIONS: NotificationItem[] = [
   { id: 'not-5', title: 'Agendamento Confirmado', message: 'Café da manhã executivo amanhã às 08h30 com o garçom Sebastião Pinheiro.', timestamp: 'Há 5 horas', read: true, type: 'success', linkTarget: { tab: 'agendamentos' } },
   { id: 'not-6', title: 'Estoque Crítico', message: 'O item Papel Sulfite A4 está com saldo 8 (mínimo 25). Necessário reposição.', timestamp: 'Ontem', read: true, type: 'alert', linkTarget: { tab: 'estoque' } },
 ];
+
+
+// Prazos de atendimento definidos para os serviços da Central Administrativa.
+export const SERVICE_SLA_POLICIES = [
+  { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', businessDays: 2 },
+  { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', businessDays: 4 },
+  { category: 'Logística e Frotas', serviceName: 'Correios & Motoboy', businessDays: 1 },
+  { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', businessDays: 4 },
+  { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', businessDays: 2 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Limpeza & Higienização', businessDays: 2 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Copa & Garçom', businessDays: 1 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Vigilância & Portaria', businessDays: 1 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Serviços Externos', businessDays: 2 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Atendimento de Eventos', businessDays: 4 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Solicitações para Portaria', businessDays: 2 },
+  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', businessDays: 5 },
+  { category: 'Viagens e Passagens', serviceName: 'Passagens Aéreas', businessDays: 2 },
+  { category: 'Viagens e Passagens', serviceName: 'Reserva de Hotel / Hospedagem', businessDays: 2 },
+  { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', businessDays: 4 },
+  { category: 'Viagens e Passagens', serviceName: 'Seguro Viagem', businessDays: 2 },
+  { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', businessDays: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Solicitação de Linha Nova', businessDays: 1 },
+  { category: 'Telefonia e Celular', serviceName: 'Substituição de Aparelho Smartphone', businessDays: 5 },
+  { category: 'Telefonia e Celular', serviceName: 'Roaming Internacional', businessDays: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Chip Corporativo', businessDays: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Ramal / PABX', businessDays: 1 },
+  { category: 'Compras Corporativas', serviceName: 'Cotação Direta', businessDays: 4 },
+] as const;
+
+const normalizeServiceName = (value: string) =>
+  value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+
+export const getServiceSlaDays = (serviceName: string): number | undefined =>
+  SERVICE_SLA_POLICIES.find((policy) => normalizeServiceName(policy.serviceName) === normalizeServiceName(serviceName))?.businessDays;
+
+const easterSunday = (year: number): Date => {
+  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+};
+const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const getBeloHorizonteHolidays = (year: number): Set<string> => {
+  const fixed = [[0,1],[3,21],[4,1],[7,15],[8,7],[9,12],[10,2],[10,15],[10,20],[11,8],[11,25]];
+  const holidays = new Set(fixed.map(([month,day]) => dateKey(new Date(year,month,day))));
+  const easter = easterSunday(year);
+  const goodFriday = new Date(easter); goodFriday.setDate(goodFriday.getDate()-2);
+  const corpusChristi = new Date(easter); corpusChristi.setDate(corpusChristi.getDate()+60);
+  holidays.add(dateKey(goodFriday)); holidays.add(dateKey(corpusChristi));
+  return holidays;
+};
+export const isBusinessDay = (date: Date): boolean => {
+  const weekday = date.getDay();
+  return weekday !== 0 && weekday !== 6 && !getBeloHorizonteHolidays(date.getFullYear()).has(dateKey(date));
+};
+const moveToNextBusinessMorning = (date: Date): Date => {
+  const next = new Date(date); next.setDate(next.getDate()+1); next.setHours(8,0,0,0);
+  while (!isBusinessDay(next)) next.setDate(next.getDate()+1);
+  return next;
+};
+// Cada dia útil equivale a 10 horas de expediente, das 08h às 18h.
+export const addBusinessSlaDeadline = (start: Date, businessDays: number): Date => {
+  let cursor = new Date(start);
+  if (!isBusinessDay(cursor)) {
+    cursor.setHours(8,0,0,0);
+    while (!isBusinessDay(cursor)) cursor.setDate(cursor.getDate()+1);
+  } else if (cursor.getHours() < 8) cursor.setHours(8,0,0,0);
+  else if (cursor.getHours() >= 18) cursor = moveToNextBusinessMorning(cursor);
+  let remainingMinutes = businessDays * 600;
+  while (remainingMinutes > 0) {
+    const close = new Date(cursor); close.setHours(18,0,0,0);
+    const available = Math.max(0, Math.floor((close.getTime()-cursor.getTime())/60000));
+    if (remainingMinutes <= available) {
+      cursor.setMinutes(cursor.getMinutes()+remainingMinutes);
+      return cursor;
+    }
+    remainingMinutes -= available;
+    cursor = moveToNextBusinessMorning(cursor);
+  }
+  return cursor;
+};
+export const getBusinessMinutesBetween = (start: Date, end: Date): number => {
+  if (start.getTime() === end.getTime()) return 0;
+  const direction = start < end ? 1 : -1;
+  const from = direction === 1 ? start : end;
+  const to = direction === 1 ? end : start;
+  let total = 0;
+  const day = new Date(from); day.setHours(0,0,0,0);
+  while (day <= to) {
+    if (isBusinessDay(day)) {
+      const opening = new Date(day); opening.setHours(8,0,0,0);
+      const closing = new Date(day); closing.setHours(18,0,0,0);
+      const overlapStart = Math.max(from.getTime(),opening.getTime());
+      const overlapEnd = Math.min(to.getTime(),closing.getTime());
+      if (overlapEnd > overlapStart) total += (overlapEnd-overlapStart)/60000;
+    }
+    day.setDate(day.getDate()+1);
+  }
+  return Math.round(total)*direction;
+};
