@@ -67,9 +67,18 @@ export const DashboardView: React.FC = () => {
     if (t.status === 'concluido' || t.status === 'cancelado' || !t.slaDeadline) return false;
     return new Date(t.slaDeadline).getTime() < nowTimestamp;
   });
-  const completedTickets = periodTickets.filter((t) => t.status === 'concluido');
-  const completedWithKnownSla = completedTickets.filter((ticket) => ticket.slaDeadline && ticket.completedAt);
-  const completedWithinSla = completedWithKnownSla.filter((ticket) => new Date(ticket.completedAt as string).getTime() <= new Date(ticket.slaDeadline).getTime());
+  const getCompletionTimestamp = (ticket: (typeof tickets)[number]) => {
+    if (ticket.completedAt) return new Date(ticket.completedAt).getTime();
+    const completionEntry = [...ticket.history].reverse().find((entry) => entry.action.toLowerCase().includes('conclu'));
+    return completionEntry ? new Date(completionEntry.timestamp).getTime() : null;
+  };
+  const completedTickets = tickets.filter((ticket) => {
+    if (ticket.status !== 'concluido') return false;
+    const completedAt = getCompletionTimestamp(ticket);
+    return completedAt !== null && completedAt >= rangeStart.getTime() && completedAt <= rangeEnd.getTime();
+  });
+  const completedWithKnownSla = completedTickets.filter((ticket) => ticket.slaDeadline && getCompletionTimestamp(ticket) !== null);
+  const completedWithinSla = completedWithKnownSla.filter((ticket) => (getCompletionTimestamp(ticket) as number) <= new Date(ticket.slaDeadline).getTime());
   const serviceEfficiency = completedWithKnownSla.length
     ? Math.round((completedWithinSla.length / completedWithKnownSla.length) * 100)
     : null;
@@ -285,7 +294,7 @@ export const DashboardView: React.FC = () => {
           <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">Demandas por Categoria</h3>
-              <p className="text-xs text-slate-500">Distribuição de chamados nos módulos da empresa</p>
+              <p className="text-xs text-slate-500">Distribuição de chamados abertos no período selecionado</p>
             </div>
             <span className="text-xs font-mono font-medium text-slate-400">Total: {periodTickets.length}</span>
           </div>
