@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ServiceCategory, TicketPriority, Ticket } from '@/types';
 import { X, Clock, UploadCloud } from 'lucide-react';
-import { getServiceSlaDays } from '@/lib/mock-data';
 
 const servicesByCategory: Partial<Record<ServiceCategory, string[]>> = {
   logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios & Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
@@ -21,7 +20,7 @@ interface FormContentProps {
 }
 
 const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onClose }) => {
-  const { createTicket, currentUser } = useApp();
+  const { createTicket, currentUser, serviceSlaPolicies } = useApp();
 
   const [category, setCategory] = useState<ServiceCategory>(initialPrefill?.category || 'manutencao');
   const [serviceName, setServiceName] = useState<string>(
@@ -51,7 +50,12 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
     setAttachedFiles((prev) => [...prev, mockFile]);
   };
 
-  const slaDays = getServiceSlaDays(serviceName);
+  const activeServices = (servicesByCategory[category] || []).filter((name) => serviceSlaPolicies.some((policy) => policy.serviceName === name && policy.active));
+  const slaDays = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active)?.businessDays;
+
+  React.useEffect(() => {
+    if (activeServices.length > 0 && !activeServices.includes(serviceName)) setServiceName(activeServices[0]);
+  }, [category, serviceSlaPolicies, serviceName]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,11 +118,12 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
               onChange={(e) => setServiceName(e.target.value)}
               className="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {(servicesByCategory[category] || []).map((srv) => (
+              {activeServices.map((srv) => (
                 <option key={srv} value={srv}>
                   {srv}
                 </option>
               ))}
+              {activeServices.length === 0 && <option value="">Nenhum serviço ativo neste módulo</option>}
             </select>
           </div>
         </div>
