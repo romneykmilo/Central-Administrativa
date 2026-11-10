@@ -265,78 +265,42 @@ export const SchedulingModule: React.FC = () => {
               {formConflictWarning && <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"><AlertTriangle className="h-4 w-4 shrink-0" />{formConflictWarning}</div>}
               {resourceType === 'motorista' ? <>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="text-xs font-semibold text-slate-700">Solicitante da corrida *
-                    <input required value={tripRequesterName} onChange={e => setTripRequesterName(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">Centro de custo *
-                    <input required value={costCenter} onChange={e => setCostCenter(e.target.value)} placeholder="Ex.: Administrativo" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">Nome do passageiro *
-                    <input required value={passengerName} onChange={e => setPassengerName(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">Motivo / identificação da corrida
-                    <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex.: Reunião externa" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                  </label>
+                  <label className="text-xs font-semibold">Solicitante da corrida *<input required value={tripRequesterName} onChange={e=>setTripRequesterName(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Centro de custo *<input required value={costCenter} onChange={e=>setCostCenter(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Nome do passageiro *<input required value={passengerName} onChange={e=>setPassengerName(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Motivo<input value={title} onChange={e=>setTitle(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Motorista *<select required value={driverId} onChange={e=>setDriverId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{drivers.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+                  <label className="text-xs font-semibold">Veículo *<select required value={vehicleId} onChange={e=>setVehicleId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{vehicles.map(x=><option key={x.id} value={x.id}>{x.model} - {x.plate}</option>)}</select></label>
+                  <label className="text-xs font-semibold">Data de saída *<input type="date" required value={startDate} onChange={e=>setStartDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Horário de saída *<input type="time" required value={startTime} onChange={e=>setStartTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Data de desembarque *<input type="date" required value={dropoffDate} onChange={e=>setDropoffDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Horário de desembarque *<input type="time" required value={dropoffTime} onChange={e=>setDropoffTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
                 </div>
+                <div className="rounded-lg border p-3"><p className="mb-2 text-xs font-semibold">Após o desembarque:</p><div className="flex gap-4 text-sm"><label><input type="radio" checked={tripMode==='somente_levar'} onChange={()=>setTripMode('somente_levar')}/> Somente levar</label><label><input type="radio" checked={tripMode==='aguardar'} onChange={()=>setTripMode('aguardar')}/> Aguardar</label></div>{tripMode==='aguardar'?<label className="mt-2 block text-xs">Fim da espera *<input type="time" required value={waitingUntil} onChange={e=>setWaitingUntil(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>:<p className="mt-2 text-xs">Bloqueio adicional de 40 minutos após o desembarque.</p>}</div>
+                <div className="grid gap-3 sm:grid-cols-2"><label className="text-xs font-semibold">Origem *<input required value={origin} onChange={e=>setOrigin(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label><label className="text-xs font-semibold">Destino *<input required value={destination} onChange={e=>setDestination(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label></div>
+              </> : resourceType === 'garcom' ? <>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="text-xs font-semibold text-slate-700">Motorista *
-                    <select required value={driverId} onChange={e => setDriverId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal">{drivers.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">Veículo *
-                    <select required value={vehicleId} onChange={e => setVehicleId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal">{vehicles.map(item => <option key={item.id} value={item.id}>{item.model} - {item.plate}</option>)}</select>
-                  </label>
+                  <label className="text-xs font-semibold">Data do evento *<input type="date" required value={startDate} onChange={e=>setStartDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Horário do evento/reunião *<input type="time" required value={eventTime} onChange={e=>setEventTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Sala de reunião *<select required value={roomId} onChange={e=>setRoomId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{meetingRooms.filter(x=>x.active).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+                  <label className="text-xs font-semibold">Garçom *<select required value={otherResourceId} onChange={e=>setOtherResourceId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{waiters.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
                 </div>
+                <div className="rounded-lg border p-3"><p className="mb-2 text-xs font-semibold">Modalidade *</p><div className="flex gap-5 text-sm"><label><input type="radio" checked={serviceMode==='montado'} onChange={()=>setServiceMode('montado')}/> Montado</label><label><input type="radio" checked={serviceMode==='volante'} onChange={()=>setServiceMode('volante')}/> Volante</label></div>{serviceMode==='montado'&&<label className="mt-3 block text-xs font-semibold">Horário da montagem *<input type="time" required value={setupTime} onChange={e=>setSetupTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>}</div>
+                <label className="block text-xs font-semibold">Título / motivo<input value={title} onChange={e=>setTitle(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
               </> : <>
-                <label className="block text-xs font-semibold text-slate-700">Tipo de recurso
-                  <select value={resourceType} onChange={e => setResourceType(e.target.value as ResourceType)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal"><option value="garcom">Garçom / Copa</option><option value="sala">Sala / Auditório</option></select>
-                </label>
-                <label className="block text-xs font-semibold text-slate-700">Título / Motivo
-                  <input required value={title} onChange={e => setTitle(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-                {resourceType === 'garcom' && <select value={otherResourceId} onChange={e => setOtherResourceId(e.target.value)} className="w-full rounded-lg border p-2.5 text-sm">{waiters.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}
-                {resourceType === 'sala' && <select value={otherResourceId} onChange={e => setOtherResourceId(e.target.value)} className="w-full rounded-lg border p-2.5 text-sm"><option value="sala-1">Auditório Master</option><option value="sala-2">Sala de Conselho</option><option value="sala-3">Sala Multiuso</option></select>}
-              </>}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-slate-700">Data de saída *
-                  <input type="date" required value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-                <label className="text-xs font-semibold text-slate-700">Horário de saída *
-                  <input type="time" required value={startTime} onChange={e => setStartTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-                <label className="text-xs font-semibold text-slate-700">Data prevista de desembarque *
-                  <input type="date" required value={dropoffDate} onChange={e => setDropoffDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-                <label className="text-xs font-semibold text-slate-700">Horário previsto de desembarque *
-                  <input type="time" required value={dropoffTime} onChange={e => setDropoffTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-              </div>
-              {resourceType === 'motorista' && <div className="space-y-3 rounded-lg border border-slate-200 p-3">
-                <div className="text-xs font-semibold text-slate-700">Após o desembarque, o motorista deverá:</div>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <label className="flex items-center gap-2"><input type="radio" checked={tripMode === 'somente_levar'} onChange={() => setTripMode('somente_levar')} /> Somente levar</label>
-                  <label className="flex items-center gap-2"><input type="radio" checked={tripMode === 'aguardar'} onChange={() => setTripMode('aguardar')} /> Aguardar o passageiro</label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-semibold">Data *<input type="date" required value={startDate} onChange={e=>setStartDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Equipe de limpeza *<select required value={cleaningTeamId} onChange={e=>setCleaningTeamId(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{cleaningTeams.filter(x=>x.active).map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+                  <label className="text-xs font-semibold">Horário de início *<input type="time" required value={cleaningStartTime} onChange={e=>setCleaningStartTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold">Horário de término *<input type="time" required value={cleaningEndTime} onChange={e=>setCleaningEndTime(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold sm:col-span-2">Local / ambiente *<select required value={location} onChange={e=>setLocation(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm">{serviceLocations.filter(x=>x.active).map(x=><option key={x.id} value={x.name}>{x.name}</option>)}</select></label>
                 </div>
-                {tripMode === 'aguardar' ? <label className="block text-xs font-semibold text-slate-700">Previsão de encerramento da espera *
-                  <input type="time" required value={waitingUntil} onChange={e => setWaitingUntil(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label> : <p className="text-xs text-slate-600">O motorista e o veículo ficarão bloqueados por mais 40 minutos após o desembarque, para permitir o retorno.</p>}
-                <p className="text-xs font-medium text-slate-700">Disponibilidade prevista até: {bookingEnd.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</p>
-              </div>}
-              {resourceType === 'motorista' ? <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-xs font-semibold text-slate-700">Local de origem *
-                  <input required value={origin} onChange={e => setOrigin(e.target.value)} placeholder="Endereço de saída" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-                <label className="text-xs font-semibold text-slate-700">Destino *
-                  <input required value={destination} onChange={e => setDestination(e.target.value)} placeholder="Endereço de destino" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-                </label>
-              </div> : <label className="block text-xs font-semibold text-slate-700">Local *
-                <input required value={location} onChange={e => setLocation(e.target.value)} placeholder="Local da reserva" className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-              </label>}
-              <label className="block text-xs font-semibold text-slate-700">Observações
-                <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm font-normal" />
-              </label>
+                <label className="block text-xs font-semibold">Título / motivo<input value={title} onChange={e=>setTitle(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
+              </>}
+              <label className="block text-xs font-semibold">Observações<textarea rows={2} value={notes} onChange={e=>setNotes(e.target.value)} className="mt-1 w-full rounded-lg border p-2.5 text-sm"/></label>
               <div className="flex justify-end gap-2 border-t pt-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-lg border px-4 py-2 text-sm">Cancelar</button>
-                <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Confirmar agendamento</button>
+                <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Enviar para aprovação</button>
               </div>
             </form>
           </div>
