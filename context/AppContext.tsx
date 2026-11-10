@@ -473,7 +473,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (conflict) {
       return {
         success: false,
-        conflict: `Conflito de horário: motorista ou veículo já está reservado no agendamento "${conflict.title}".`,
+        conflict: `Conflito de horário: recurso, equipe ou veículo já está reservado no agendamento "${conflict.title}".`,
       };
     }
 
@@ -558,6 +558,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setServiceSlaPolicies(SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true })));
     setServiceSlaHistory([]);
     setSchedules(MOCK_SCHEDULES);
+    setDrivers(MOCK_DRIVERS);
+    setVehicles(MOCK_VEHICLES);
+    setWaiters(MOCK_WAITERS);
+    setMeetingRooms([{ id: 'room-1', name: 'Auditório Master', capacity: 120, location: 'Sede Administrativa', active: true }, { id: 'room-2', name: 'Sala de Conselho', capacity: 24, location: 'Sede Administrativa', active: true }, { id: 'room-3', name: 'Sala Multiuso', capacity: 30, location: 'Sede Administrativa', active: true }]);
+    setServiceLocations([{ id: 'loc-1', name: 'Sede Administrativa', active: true }, { id: 'loc-2', name: 'Auditório Master', active: true }, { id: 'loc-3', name: 'Copa', active: true }]);
+    setCleaningTeams([{ id: 'clean-1', name: 'Equipe de Limpeza 1', members: 4, active: true }, { id: 'clean-2', name: 'Equipe de Limpeza 2', members: 4, active: true }]);
     setContracts(MOCK_CONTRACTS);
     setInventory(MOCK_INVENTORY);
     setPurchaseRequests(MOCK_PURCHASE_REQUESTS);
