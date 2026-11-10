@@ -2,271 +2,136 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import {
-  Truck,
-  Car,
-  Package,
-  Plus,
-  Clock,
-  Phone,
-  CheckCircle,
-  AlertCircle,
-  MapPin,
-  Send,
-  Navigation,
-  Fuel,
-  Wrench,
-} from 'lucide-react';
+import { SchedulingModule } from '@/components/modules/SchedulingModule';
+import { Truck, Car, Package, Send, MapPin, ArrowRightLeft, Boxes, Mail, ClipboardList } from 'lucide-react';
+
+type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'cargas' | 'malote';
 
 export const LogisticsModule: React.FC = () => {
-  const { drivers, vehicles, openNewTicketWithPrefill, setActiveTab } = useApp();
-  const [activeSub, setActiveSub] = useState<'motoristas' | 'veiculos' | 'correios'>('motoristas');
-
-  // Quick motoboy simulation state
-  const [origin, setOrigin] = useState('Sede Paulista - 4º andar');
+  const { vehicles, openNewTicketWithPrefill } = useApp();
+  const [activeSub, setActiveSub] = useState<LogisticsService>('motorista');
+  const [origin, setOrigin] = useState('Sede Administrativa');
   const [destination, setDestination] = useState('');
   const [recipient, setRecipient] = useState('');
+  const [deliveryType, setDeliveryType] = useState('Motoboy dedicado');
   const [notes, setNotes] = useState('');
 
-  const handleRequestMotoboy = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!destination.trim()) return;
-
+  const requestTicket = (serviceName: string, title: string, guidance: string) => {
     openNewTicketWithPrefill({
-      title: `Envio Express Motoboy para ${recipient || 'Destinatário'}`,
-      description: `Origem: ${origin}\nDestino: ${destination}\nDestinatário: ${recipient}\nObservações: ${notes}`,
+      title,
+      description: guidance,
       category: 'logistica',
-      serviceName: 'Correios e Motoboy',
-      priority: 'alta',
+      serviceName,
+      priority: 'media',
+    });
+  };
+
+  const handleRequestMotoboy = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!destination.trim()) return;
+    openNewTicketWithPrefill({
+      title: `Envio / coleta: ${destination}`,
+      description: `Tipo de envio: ${deliveryType}\nOrigem: ${origin}\nDestino: ${destination}\nDestinatário / contato: ${recipient || 'Não informado'}\nOrientações: ${notes || 'Não informado'}`,
+      category: 'logistica',
+      serviceName: 'Correios & Motoboy',
+      priority: 'media',
       location: destination,
     });
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Módulo de Logística & Mobilidade</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Gestão operacional de motoristas corporativos, frota de veículos e despachos expressos
-          </p>
-        </div>
+  const tabs = [
+    { id: 'motorista' as const, label: 'Agendamento de Motorista', icon: Truck },
+    { id: 'locacao' as const, label: 'Locação de Veículos', icon: Car },
+    { id: 'correios' as const, label: 'Correios & Motoboy', icon: Package },
+    { id: 'cargas' as const, label: 'Transporte de Cargas', icon: Boxes },
+    { id: 'malote' as const, label: 'Malote Corporativo', icon: Mail },
+  ];
 
-        <button
-          onClick={() =>
-            openNewTicketWithPrefill({
-              category: 'logistica',
-              serviceName: 'Motorista Executivo',
-              priority: 'alta',
-            })
-          }
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Solicitar Transporte</span>
-        </button>
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Frotas</h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
       </div>
 
-      {/* Subtabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 text-xs font-semibold pb-1">
-        {[
-          { id: 'motoristas', label: `Quadro de Motoristas (${drivers.length})`, icon: Truck },
-          { id: 'veiculos', label: `Frota Corporativa (${vehicles.length})`, icon: Car },
-          { id: 'correios', label: 'Solicitação Rápida / Motoboy & Correios', icon: Package },
-        ].map((tab) => {
+      <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
+        {tabs.map(tab => {
           const Icon = tab.icon;
-          const isSel = activeSub === tab.id;
+          const selected = activeSub === tab.id;
           return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSub(tab.id as any)}
-              className={`flex items-center gap-2 px-3 py-2 border-b-2 font-medium transition-colors ${
-                isSel
-                  ? 'border-blue-600 text-blue-600 font-bold'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
+            <button key={tab.id} onClick={() => setActiveSub(tab.id)}
+              className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-xs font-semibold transition-colors ${selected ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+              <Icon className="h-4 w-4" />{tab.label}
             </button>
           );
         })}
       </div>
 
-      {/* Subtab 1: Motoristas */}
-      {activeSub === 'motoristas' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {drivers.map((d) => (
-            <div key={d.id} className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-semibold text-slate-900 text-sm">{d.name}</h4>
-                  <span className="text-[11px] text-slate-500 font-mono">CNH: {d.cnh}</span>
-                </div>
-                <span
-                  className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold ${
-                    d.status === 'disponivel'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : d.status === 'em_viagem'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  {d.status.replace('_', ' ')}
-                </span>
-              </div>
-
-              <div className="space-y-1 text-xs text-slate-600">
-                <div className="flex items-center gap-2">
-                  <Car className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{d.assignedVehicle || 'Veículo reserva'}</span>
-                </div>
-                <div className="flex items-center gap-2 font-mono text-[11px]">
-                  <Phone className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{d.phone}</span>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-amber-500 font-bold">★ {d.rating.toFixed(1)}</span>
-                <button
-                  onClick={() =>
-                    openNewTicketWithPrefill({
-                      title: `Agendamento com Motorista ${d.name}`,
-                      category: 'logistica',
-                      serviceName: 'Motorista Executivo',
-                      description: `Solicitação direta para o motorista ${d.name}.`,
-                    })
-                  }
-                  className="text-blue-600 hover:text-blue-800 font-semibold"
-                >
-                  Agendar este motorista
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Subtab 2: Veículos */}
-      {activeSub === 'veiculos' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {vehicles.map((v) => (
-            <div key={v.id} className="p-4 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-semibold text-slate-900 text-sm">{v.model}</h4>
-                  <span className="text-[11px] font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold">
-                    {v.plate}
-                  </span>
-                </div>
-                <span
-                  className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-bold ${
-                    v.status === 'disponivel'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : v.status === 'em_uso'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}
-                >
-                  {v.status.replace('_', ' ')}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                <div className="flex items-center gap-1.5">
-                  <Navigation className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="font-mono">{v.currentKm.toLocaleString('pt-BR')} KM</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Fuel className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{v.fuelLevel}</span>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                <span>Próx. Revisão: {v.nextRevisionKm.toLocaleString('pt-BR')} KM</span>
-                <span>Últ. Manut: {v.lastMaintenance}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Subtab 3: Motoboy & Correios Rápido */}
-      {activeSub === 'correios' && (
-        <div className="max-w-2xl bg-white border border-slate-200 rounded-xl p-6 shadow-2xs space-y-4">
-          <div>
-            <h3 className="text-base font-semibold text-slate-900">Solicitação Expressa de Motoboy / Malote</h3>
-            <p className="text-xs text-slate-500">Despacho de contratos, encomendas e correspondências urgentes</p>
+      {activeSub === 'motorista' && (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
+            Consulte o calendário, escolha o período e envie o pedido de transporte. A solicitação ficará pendente até a aprovação da gestão.
           </div>
+          <SchedulingModule embeddedDriverOnly />
+        </div>
+      )}
 
-          <form onSubmit={handleRequestMotoboy} className="space-y-4 text-xs">
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Local de Coleta (Origem) *</label>
-              <input
-                type="text"
-                required
-                value={origin}
-                onChange={(e) => setOrigin(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Endereço de Entrega (Destino Completo) *</label>
-              <input
-                type="text"
-                required
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="Ex: Av. Faria Lima, 3477 - 14º andar, Itaim Bibi"
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Pessoa / Contato Destinatário</label>
-                <input
-                  type="text"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  placeholder="Ex: Dr. Roberto Alcantara (Jurídico)"
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Tipo de Envio</label>
-                <select className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800">
-                  <option>Motoboy Dedicado (Até 2h)</option>
-                  <option>SEDEX Correios</option>
-                  <option>Malote Fixo Diário</option>
-                </select>
+      {activeSub === 'locacao' && (
+        <div className="space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-5">
+            <div className="flex items-start gap-3">
+              <Car className="mt-0.5 h-5 w-5 text-blue-600" />
+              <div><h2 className="text-sm font-semibold text-slate-900">Solicitar locação de veículo</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Utilize este serviço quando houver necessidade de veículo alugado para atividade institucional, deslocamento ou demanda temporária. Informe período, quantidade de passageiros, tipo de veículo, destino e justificativa.</p>
               </div>
             </div>
-
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Instruções / Retorno de Protocolo</label>
-              <textarea
-                rows={2}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ex: Exigir assinatura no protocolo; esperar colher rubrica em 3 vias..."
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-800"
-              />
+            <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
+              <p className="font-semibold text-slate-700">Informações necessárias</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5"><li>Data e horário de retirada e devolução</li><li>Local de retirada e devolução</li><li>Categoria do veículo e quantidade de passageiros</li><li>Destino, período de utilização e justificativa</li></ul>
             </div>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 4 dias úteis.</span>
+              <button onClick={() => requestTicket('Locação de Veículos','Solicitação de locação de veículo','Informe: período de utilização (retirada e devolução), local de retirada/devolução, categoria do veículo, quantidade de passageiros, destino e justificativa da locação.')}
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar locação <Send className="h-4 w-4" /></button>
+            </div>
+          </div>
+          {vehicles.length > 0 && <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="text-xs font-semibold text-slate-800">Frota própria cadastrada</h3>
+            <p className="mt-1 text-[11px] text-slate-500">A locação é uma solicitação separada e será analisada pela equipe responsável.</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{vehicles.map(vehicle => <div key={vehicle.id} className="rounded-lg border border-slate-100 p-3 text-xs"><p className="font-semibold text-slate-800">{vehicle.model}</p><p className="mt-1 text-slate-500">{vehicle.plate} · {vehicle.status.replace('_',' ')}</p></div>)}</div>
+          </div>}
+        </div>
+      )}
 
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              <span>Solicitar Coleta e Envio</span>
-            </button>
+      {activeSub === 'correios' && (
+        <div className="max-w-2xl rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex items-start gap-3"><Package className="mt-0.5 h-5 w-5 text-blue-600" /><div><h2 className="text-sm font-semibold text-slate-900">Solicitar coleta ou envio</h2><p className="mt-1 text-xs text-slate-500">Para correspondências, documentos, encomendas e entregas externas.</p></div></div>
+          <form onSubmit={handleRequestMotoboy} className="mt-4 space-y-3 text-xs">
+            <label className="block font-semibold text-slate-700">Tipo de envio *<select required value={deliveryType} onChange={e=>setDeliveryType(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal"><option>Motoboy dedicado</option><option>Correios - SEDEX</option><option>Correios - PAC</option><option>Malote fixo</option></select></label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="font-semibold text-slate-700">Local de coleta *<input required value={origin} onChange={e=>setOrigin(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
+              <label className="font-semibold text-slate-700">Endereço de entrega *<input required value={destination} onChange={e=>setDestination(e.target.value)} placeholder="Endereço completo" className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
+            </div>
+            <label className="block font-semibold text-slate-700">Destinatário / contato<input value={recipient} onChange={e=>setRecipient(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
+            <label className="block font-semibold text-slate-700">Orientações e observações<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Descreva o conteúdo, prazo, necessidade de protocolo ou assinatura." className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
+            <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700"><Send className="h-4 w-4"/> Enviar solicitação</button>
           </form>
+        </div>
+      )}
+
+      {activeSub === 'cargas' && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex items-start gap-3"><Boxes className="mt-0.5 h-5 w-5 text-blue-600"/><div><h2 className="text-sm font-semibold text-slate-900">Solicitar transporte de cargas</h2><p className="mt-1 text-xs leading-5 text-slate-600">Para movimentação de materiais, mobiliário, equipamentos, documentos em volume ou outros itens que exijam transporte dedicado.</p></div></div>
+          <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600"><p className="font-semibold text-slate-700">Antes de solicitar, reúna:</p><ul className="mt-2 list-disc space-y-1 pl-5"><li>Descrição, quantidade e dimensões aproximadas dos itens</li><li>Endereço de origem e destino</li><li>Data desejada e necessidade de ajudantes</li><li>Condições de acesso, carga e descarga</li></ul></div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 4 dias úteis.</span><button onClick={()=>requestTicket('Transporte de Cargas','Solicitação de transporte de cargas','Informe descrição dos itens, quantidade, dimensões e peso aproximados, endereço de origem e destino, data desejada, necessidade de ajudantes e condições de carga/descarga.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar transporte <Send className="h-4 w-4"/></button></div>
+        </div>
+      )}
+
+      {activeSub === 'malote' && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="flex items-start gap-3"><Mail className="mt-0.5 h-5 w-5 text-blue-600"/><div><h2 className="text-sm font-semibold text-slate-900">Solicitar envio por malote corporativo</h2><p className="mt-1 text-xs leading-5 text-slate-600">Para circulação programada de documentos e pequenos volumes entre unidades, departamentos ou endereços atendidos pelo serviço de malote.</p></div></div>
+          <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600"><p className="font-semibold text-slate-700">Informações necessárias</p><ul className="mt-2 list-disc space-y-1 pl-5"><li>Unidade ou setor de origem e destino</li><li>Nome do destinatário e contato</li><li>Descrição e quantidade de volumes</li><li>Data desejada e observações de entrega</li></ul></div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 2 dias úteis.</span><button onClick={()=>requestTicket('Malote Corporativo','Solicitação de malote corporativo','Informe unidade/setor de origem e destino, destinatário e contato, descrição e quantidade de volumes, data desejada e orientações especiais de entrega.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar malote <Send className="h-4 w-4"/></button></div>
         </div>
       )}
     </div>
