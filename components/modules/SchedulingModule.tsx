@@ -211,8 +211,8 @@ export const SchedulingModule: React.FC = () => {
         <button onClick={() => setActiveTab('motorista')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'motorista' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Truck className="mr-1 inline h-4 w-4" /> Agendamento Motorista
         </button>
-        <button onClick={() => setActiveTab('garcom')} className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Agendamento Garçom</button>
-        <button onClick={() => setActiveTab('limpeza')} className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Agendamento Limpeza</button>
+        <button onClick={() => setActiveTab('garcom')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'garcom' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>Agendamento Garçom</button>
+        <button onClick={() => setActiveTab('limpeza')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'limpeza' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>Agendamento Limpeza</button>
         <div className="ml-auto flex gap-2">
           {activeTab === 'garcom' && <button onClick={() => openModal('garcom')} className="rounded-md border px-3 py-1.5 text-xs">Agendar garçom</button>}
           {activeTab === 'limpeza' && <button onClick={() => openModal('limpeza')} className="rounded-md border px-3 py-1.5 text-xs">Agendar limpeza</button>}
