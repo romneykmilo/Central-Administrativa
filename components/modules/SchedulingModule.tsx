@@ -12,10 +12,10 @@ const localDateTime = (date: string, time: string) => new Date(`${date}T${time}:
 const plusMinutes = (date: Date, minutes: number) => new Date(date.getTime() + minutes * 60000);
 const formatTime = (value?: string) => value ? new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
-export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean }> = ({ embeddedDriverOnly = false }) => {
+export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embeddedResourceType?: 'motorista' | 'garcom' | 'limpeza' }> = ({ embeddedDriverOnly = false, embeddedResourceType }) => {
   const { schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, createSchedule, cancelSchedule, approveSchedule, rejectSchedule, currentUser } = useApp();
   const [viewMode, setViewMode] = useState<CalendarMode>('mes');
-  const [activeTab, setActiveTab] = useState<'motorista' | 'garcom' | 'limpeza'>('motorista');
+  const [activeTab, setActiveTab] = useState<'motorista' | 'garcom' | 'limpeza'>(embeddedResourceType || 'motorista');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resourceType, setResourceType] = useState<ResourceType>('motorista');
@@ -198,16 +198,16 @@ export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean }> = ({ e
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {!embeddedDriverOnly && <div>
+        {!embeddedDriverOnly && !embeddedResourceType && <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agendamentos de Recursos</h1>
           <p className="mt-1 text-sm text-slate-500">Solicitações de motorista, garçom e limpeza, sujeitas à aprovação da gestão.</p>
         </div>}
         <button onClick={() => openModal(activeTab)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          <Plus className="h-4 w-4" /> {embeddedDriverOnly ? 'Solicitar motorista' : 'Novo agendamento'}
+          <Plus className="h-4 w-4" /> {embeddedResourceType === 'limpeza' ? 'Solicitar equipe de limpeza' : embeddedResourceType === 'garcom' ? 'Solicitar garçom' : embeddedDriverOnly ? 'Solicitar motorista' : 'Novo agendamento'}
         </button>
       </div>
 
-      {!embeddedDriverOnly && (
+      {!embeddedDriverOnly && !embeddedResourceType && (
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
         <button onClick={() => setActiveTab('motorista')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'motorista' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Truck className="mr-1 inline h-4 w-4" /> Agendamento Motorista
