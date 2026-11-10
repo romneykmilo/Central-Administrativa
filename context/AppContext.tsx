@@ -22,6 +22,9 @@ import {
   Supplier,
   ServiceSlaPolicy,
   ServiceSlaChange,
+  MeetingRoom,
+  ServiceLocation,
+  CleaningTeam,
 } from '@/types';
 import { addBusinessSlaDeadline } from '@/lib/mock-data';
 import {
@@ -73,6 +76,23 @@ interface AppContextType {
   drivers: Driver[];
   vehicles: Vehicle[];
   waiters: Waiter[];
+  meetingRooms: MeetingRoom[];
+  serviceLocations: ServiceLocation[];
+  cleaningTeams: CleaningTeam[];
+  saveDriver: (item: Driver) => void;
+  removeDriver: (id: string) => void;
+  saveVehicle: (item: Vehicle) => void;
+  removeVehicle: (id: string) => void;
+  saveWaiter: (item: Waiter) => void;
+  removeWaiter: (id: string) => void;
+  saveMeetingRoom: (item: MeetingRoom) => void;
+  removeMeetingRoom: (id: string) => void;
+  saveServiceLocation: (item: ServiceLocation) => void;
+  removeServiceLocation: (id: string) => void;
+  saveCleaningTeam: (item: CleaningTeam) => void;
+  removeCleaningTeam: (id: string) => void;
+  approveSchedule: (id: string) => void;
+  rejectSchedule: (id: string, reason?: string) => void;
   createSchedule: (schedule: Omit<ResourceSchedule, 'id'>) => { success: boolean; schedule?: ResourceSchedule; conflict?: string };
   cancelSchedule: (id: string) => void;
 
@@ -157,9 +177,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return stored?.schedules || MOCK_SCHEDULES;
   });
 
-  const [drivers] = useState<Driver[]>(MOCK_DRIVERS);
-  const [vehicles] = useState<Vehicle[]>(MOCK_VEHICLES);
-  const [waiters] = useState<Waiter[]>(MOCK_WAITERS);
+  const [drivers, setDrivers] = useState<Driver[]>(() => getStoredData()?.drivers || MOCK_DRIVERS);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(() => getStoredData()?.vehicles || MOCK_VEHICLES);
+  const [waiters, setWaiters] = useState<Waiter[]>(() => getStoredData()?.waiters || MOCK_WAITERS);
+  const [meetingRooms, setMeetingRooms] = useState<MeetingRoom[]>(() => getStoredData()?.meetingRooms || [
+    { id: 'room-1', name: 'Auditório Master', capacity: 120, location: 'Sede Administrativa', active: true },
+    { id: 'room-2', name: 'Sala de Conselho', capacity: 24, location: 'Sede Administrativa', active: true },
+    { id: 'room-3', name: 'Sala Multiuso', capacity: 30, location: 'Sede Administrativa', active: true },
+  ]);
+  const [serviceLocations, setServiceLocations] = useState<ServiceLocation[]>(() => getStoredData()?.serviceLocations || [
+    { id: 'loc-1', name: 'Sede Administrativa', active: true },
+    { id: 'loc-2', name: 'Auditório Master', active: true },
+    { id: 'loc-3', name: 'Copa', active: true },
+  ]);
+  const [cleaningTeams, setCleaningTeams] = useState<CleaningTeam[]>(() => getStoredData()?.cleaningTeams || [
+    { id: 'clean-1', name: 'Equipe de Limpeza 1', members: 4, active: true },
+    { id: 'clean-2', name: 'Equipe de Limpeza 2', members: 4, active: true },
+  ]);
   const [suppliers] = useState<Supplier[]>(MOCK_SUPPLIERS);
 
   const [contracts, setContracts] = useState<Contract[]>(() => {
@@ -200,6 +234,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         serviceSlaPolicies,
         serviceSlaHistory,
         schedules,
+        drivers,
+        vehicles,
+        waiters,
+        meetingRooms,
+        serviceLocations,
+        cleaningTeams,
         contracts,
         inventory,
         purchaseRequests,
@@ -210,7 +250,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore
     }
-  }, [tickets, serviceSlaPolicies, serviceSlaHistory, schedules, contracts, inventory, purchaseRequests, notifications, currentUser]);
+  }, [tickets, serviceSlaPolicies, serviceSlaHistory, schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, contracts, inventory, purchaseRequests, notifications, currentUser]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -403,13 +443,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Chamado atribuído a ${assignedToName}`);
   };
 
+  const saveDriver = (item: Driver) => setDrivers(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeDriver = (id: string) => setDrivers(prev => prev.filter(x => x.id !== id));
+  const saveVehicle = (item: Vehicle) => setVehicles(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeVehicle = (id: string) => setVehicles(prev => prev.filter(x => x.id !== id));
+  const saveWaiter = (item: Waiter) => setWaiters(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeWaiter = (id: string) => setWaiters(prev => prev.filter(x => x.id !== id));
+  const saveMeetingRoom = (item: MeetingRoom) => setMeetingRooms(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeMeetingRoom = (id: string) => setMeetingRooms(prev => prev.filter(x => x.id !== id));
+  const saveServiceLocation = (item: ServiceLocation) => setServiceLocations(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeServiceLocation = (id: string) => setServiceLocations(prev => prev.filter(x => x.id !== id));
+  const saveCleaningTeam = (item: CleaningTeam) => setCleaningTeams(prev => prev.some(x => x.id === item.id) ? prev.map(x => x.id === item.id ? item : x) : [...prev, item]);
+  const removeCleaningTeam = (id: string) => setCleaningTeams(prev => prev.filter(x => x.id !== id));
+
   const createSchedule = (scheduleData: Omit<ResourceSchedule, 'id'>) => {
     const startA = new Date(scheduleData.startDateTime).getTime();
     const endA = new Date(scheduleData.endDateTime).getTime();
     const requestedResourceIds = [scheduleData.resourceId, scheduleData.driverId, scheduleData.vehicleId].filter(Boolean) as string[];
 
     const conflict = schedules.find((s) => {
-      if (s.status === 'cancelado') return false;
+      if (s.status === 'cancelado' || s.status === 'rejeitado') return false;
       const existingResourceIds = [s.resourceId, s.driverId, s.vehicleId].filter(Boolean) as string[];
       if (!requestedResourceIds.some((id) => existingResourceIds.includes(id))) return false;
       const startB = new Date(s.startDateTime).getTime();
@@ -430,8 +483,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     setSchedules((prev) => [newSchedule, ...prev]);
-    showToast(`Agendamento "${newSchedule.title}" criado com sucesso!`);
+    showToast(`Solicitação de agendamento "${newSchedule.title}" enviada para aprovação.`);
     return { success: true, schedule: newSchedule };
+  };
+
+  const approveSchedule = (id: string) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { showToast('Apenas gestores podem aprovar agendamentos.'); return; }
+    setSchedules(prev => prev.map(s => s.id === id && s.status === 'pendente' ? { ...s, status: 'confirmado', approvedBy: currentUser.name, approvedAt: new Date().toISOString() } : s));
+    showToast('Agendamento aprovado e confirmado.');
+  };
+
+  const rejectSchedule = (id: string, reason?: string) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { showToast('Apenas gestores podem rejeitar agendamentos.'); return; }
+    setSchedules(prev => prev.map(s => s.id === id && s.status === 'pendente' ? { ...s, status: 'rejeitado', approvedBy: currentUser.name, approvedAt: new Date().toISOString(), rejectionReason: reason } : s));
+    showToast('Solicitação de agendamento rejeitada.');
   };
 
   const cancelSchedule = (id: string) => {
@@ -530,6 +595,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         drivers,
         vehicles,
         waiters,
+        meetingRooms,
+        serviceLocations,
+        cleaningTeams,
+        saveDriver,
+        removeDriver,
+        saveVehicle,
+        removeVehicle,
+        saveWaiter,
+        removeWaiter,
+        saveMeetingRoom,
+        removeMeetingRoom,
+        saveServiceLocation,
+        removeServiceLocation,
+        saveCleaningTeam,
+        removeCleaningTeam,
+        approveSchedule,
+        rejectSchedule,
         createSchedule,
         cancelSchedule,
         contracts,
