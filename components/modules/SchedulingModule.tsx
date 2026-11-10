@@ -13,9 +13,9 @@ const plusMinutes = (date: Date, minutes: number) => new Date(date.getTime() + m
 const formatTime = (value?: string) => value ? new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
 export const SchedulingModule: React.FC = () => {
-  const { schedules, drivers, vehicles, waiters, createSchedule, cancelSchedule, currentUser } = useApp();
+  const { schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, createSchedule, cancelSchedule, approveSchedule, rejectSchedule, currentUser } = useApp();
   const [viewMode, setViewMode] = useState<CalendarMode>('mes');
-  const [activeTab, setActiveTab] = useState<'motorista' | 'outros'>('motorista');
+  const [activeTab, setActiveTab] = useState<'motorista' | 'garcom' | 'limpeza'>('motorista');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resourceType, setResourceType] = useState<ResourceType>('motorista');
@@ -37,6 +37,13 @@ export const SchedulingModule: React.FC = () => {
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [formConflictWarning, setFormConflictWarning] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState(meetingRooms.find(item => item.active)?.id || '');
+  const [cleaningTeamId, setCleaningTeamId] = useState(cleaningTeams.find(item => item.active)?.id || '');
+  const [serviceMode, setServiceMode] = useState<'montado' | 'volante'>('montado');
+  const [eventTime, setEventTime] = useState('09:00');
+  const [setupTime, setSetupTime] = useState('08:30');
+  const [cleaningStartTime, setCleaningStartTime] = useState('08:00');
+  const [cleaningEndTime, setCleaningEndTime] = useState('10:00');
 
   const driver = drivers.find(item => item.id === driverId);
   const vehicle = vehicles.find(item => item.id === vehicleId);
@@ -45,9 +52,7 @@ export const SchedulingModule: React.FC = () => {
     return tripMode === 'aguardar' ? localDateTime(dropoffDate, waitingUntil) : plusMinutes(dropoff, 40);
   }, [dropoffDate, dropoffTime, tripMode, waitingUntil]);
 
-  const driverSchedules = schedules.filter(s => s.resourceType === 'motorista' || !!s.driverId);
-  const otherSchedules = schedules.filter(s => s.resourceType !== 'motorista' && !s.driverId);
-  const visibleSchedules = activeTab === 'motorista' ? driverSchedules : otherSchedules;
+  const visibleSchedules = schedules.filter(s => activeTab === 'motorista' ? s.resourceType === 'motorista' || !!s.driverId : activeTab === 'garcom' ? s.resourceType === 'garcom' : s.resourceType === 'limpeza');
 
   const openModal = (type: ResourceType = 'motorista') => {
     setResourceType(type);
@@ -72,8 +77,12 @@ export const SchedulingModule: React.FC = () => {
       setVehicleId(assigned?.id || vehicles[0]?.id || '');
     } else if (type === 'garcom') {
       setOtherResourceId(waiters[0]?.id || '');
-    } else {
-      setOtherResourceId('sala-1');
+      setRoomId(meetingRooms.find(item => item.active)?.id || '');
+      setEventTime('09:00'); setSetupTime('08:30'); setServiceMode('montado');
+    } else if (type === 'limpeza') {
+      setCleaningTeamId(cleaningTeams.find(item => item.active)?.id || '');
+      setCleaningStartTime('08:00'); setCleaningEndTime('10:00');
+      setLocation(serviceLocations.find(item => item.active)?.name || '');
     }
     setIsModalOpen(true);
   };
