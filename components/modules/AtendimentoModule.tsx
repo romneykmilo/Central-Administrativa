@@ -60,7 +60,7 @@ export const AtendimentoModule: React.FC = () => {
       {activeSub === 'limpeza' && (
         <div className="space-y-3">
           <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
-            Utilize o calendário para solicitar uma equipe de limpeza. Informe local, data e período de atendimento. A solicitação ficará pendente até aprovação da gestão; conflitos de equipe são verificados automaticamente.
+            Utilize o calendário para solicitar uma equipe de limpeza. Informe local, data e período de atendimento. A solicitação ficará pendente até aprovação da gestão; conflitos de equipe são verificados automaticamente. {getSlaLabel('Limpeza & Higienização')}
           </div>
           <SchedulingModule embeddedResourceType="limpeza" />
         </div>
@@ -69,7 +69,7 @@ export const AtendimentoModule: React.FC = () => {
       {activeSub === 'garcom' && (
         <div className="space-y-3">
           <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
-            Solicite o atendimento de garçom para reuniões e eventos. Informe sala, data, horário e modalidade do serviço (montado ou volante). O pedido ficará pendente até aprovação e o sistema verificará a disponibilidade.
+            Solicite o atendimento de garçom para reuniões e eventos. Informe sala, data, horário e modalidade do serviço (montado ou volante). O pedido ficará pendente até aprovação e o sistema verificará a disponibilidade. {getSlaLabel('Copa & Garçom')}
           </div>
           <SchedulingModule embeddedResourceType="garcom" />
         </div>
