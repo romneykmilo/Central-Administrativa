@@ -2,10 +2,46 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Clock, Save, ToggleLeft, ToggleRight, History, ShieldAlert } from 'lucide-react';
+import { Clock, Save, ToggleLeft, ToggleRight, History, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
-  const { currentUser, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy } = useApp();
+  const { currentUser, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy,
+    drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams,
+    saveDriver, removeDriver, saveVehicle, removeVehicle, saveWaiter, removeWaiter,
+    saveMeetingRoom, removeMeetingRoom, saveServiceLocation, removeServiceLocation,
+    saveCleaningTeam, removeCleaningTeam } = useApp();
+  const [masterTab, setMasterTab] = useState<'motoristas' | 'veiculos' | 'garcons' | 'salas' | 'locais' | 'equipes'>('motoristas');
+  const [name, setName] = useState('');
+  const [detail, setDetail] = useState('');
+  const [extra, setExtra] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const resetMasterForm = () => { setName(''); setDetail(''); setExtra(''); setEditingId(null); };
+  const submitMaster = (event: React.FormEvent) => {
+    event.preventDefault();
+    const id = editingId || (masterTab + '-' + Date.now());
+    if (!name.trim()) return;
+    if (masterTab === 'motoristas') saveDriver({ id, name: name.trim(), cnh: detail, phone: extra, status: 'disponivel', rating: 5 });
+    if (masterTab === 'veiculos') saveVehicle({ id, model: name.trim(), plate: detail.toUpperCase(), year: Number(extra) || new Date().getFullYear(), status: 'disponivel', currentKm: 0, fuelLevel: 'Não informado', lastMaintenance: '', nextRevisionKm: 0 });
+    if (masterTab === 'garcons') saveWaiter({ id, name: name.trim(), shift: 'integral', status: 'disponivel', specialties: [] });
+    if (masterTab === 'salas') saveMeetingRoom({ id, name: name.trim(), capacity: Number(detail) || undefined, location: extra, active: true });
+    if (masterTab === 'locais') saveServiceLocation({ id, name: name.trim(), description: detail, active: true });
+    if (masterTab === 'equipes') saveCleaningTeam({ id, name: name.trim(), members: Number(detail) || undefined, active: true });
+    resetMasterForm();
+  };
+  const editMaster = (item: any) => {
+    setEditingId(item.id); setName(item.name || item.model || '');
+    setDetail(masterTab === 'motoristas' ? item.cnh : masterTab === 'veiculos' ? item.plate : masterTab === 'salas' ? String(item.capacity || '') : masterTab === 'equipes' ? String(item.members || '') : item.description || '');
+    setExtra(masterTab === 'motoristas' ? item.phone : masterTab === 'veiculos' ? String(item.year) : item.location || '');
+  };
+  const masterItems: any[] = masterTab === 'motoristas' ? drivers : masterTab === 'veiculos' ? vehicles : masterTab === 'garcons' ? waiters : masterTab === 'salas' ? meetingRooms : masterTab === 'locais' ? serviceLocations : cleaningTeams;
+  const deleteMaster = (id: string) => {
+    if (masterTab === 'motoristas') removeDriver(id);
+    if (masterTab === 'veiculos') removeVehicle(id);
+    if (masterTab === 'garcons') removeWaiter(id);
+    if (masterTab === 'salas') removeMeetingRoom(id);
+    if (masterTab === 'locais') removeServiceLocation(id);
+    if (masterTab === 'equipes') removeCleaningTeam(id);
+  };
   const [draftDays, setDraftDays] = useState<Record<string, string>>({});
   const canManage = currentUser.role === 'admin' || currentUser.role === 'manager';
 
@@ -20,6 +56,26 @@ export const SettingsModule: React.FC = () => {
         <p className="mt-1 text-xs sm:text-sm text-slate-500">Cadastro e controle dos prazos de atendimento por serviço.</p>
       </div>
 
+
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="border-b px-4 py-3"><h2 className="text-sm font-semibold text-slate-900">Cadastros centralizados</h2><p className="mt-1 text-xs text-slate-500">Dados reutilizados nos formulários de agendamento e operação.</p></div>
+        <div className="flex flex-wrap gap-2 border-b p-3">
+          {([{id:'motoristas',label:'Motoristas'},{id:'veiculos',label:'Veículos'},{id:'garcons',label:'Garçons'},{id:'salas',label:'Salas de reunião'},{id:'locais',label:'Locais / ambientes'},{id:'equipes',label:'Equipes de limpeza'}] as const).map(tab => <button key={tab.id} onClick={() => {setMasterTab(tab.id);resetMasterForm();}} className={`rounded-md px-3 py-2 text-xs font-semibold ${masterTab===tab.id?'bg-slate-900 text-white':'bg-slate-100 text-slate-600'}`}>{tab.label}</button>)}
+        </div>
+        <form onSubmit={submitMaster} className="grid gap-2 border-b bg-slate-50 p-3 sm:grid-cols-4">
+          <input required value={name} onChange={e=>setName(e.target.value)} placeholder={masterTab==='veiculos'?'Modelo do veículo':'Nome'} className="rounded-md border bg-white px-3 py-2 text-sm" />
+          {masterTab!=='garcons' && <input value={detail} onChange={e=>setDetail(e.target.value)} placeholder={masterTab==='motoristas'?'CNH':masterTab==='veiculos'?'Placa':masterTab==='salas'?'Capacidade':masterTab==='equipes'?'Quantidade de integrantes':'Descrição'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
+          {(masterTab==='motoristas'||masterTab==='veiculos'||masterTab==='salas') && <input value={extra} onChange={e=>setExtra(e.target.value)} placeholder={masterTab==='motoristas'?'Telefone':masterTab==='veiculos'?'Ano':'Localização'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
+          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>{editingId?'Salvar alterações':'Adicionar cadastro'}</button>
+          {editingId && <button type="button" onClick={resetMasterForm} className="text-xs text-slate-500">Cancelar edição</button>}
+        </form>
+        <div className="divide-y">
+          {masterItems.length===0 ? <p className="p-5 text-center text-sm text-slate-500">Nenhum cadastro realizado.</p> : masterItems.map(item => <div key={item.id} className="flex items-center justify-between gap-3 px-4 py-3">
+            <div><p className="text-sm font-medium text-slate-800">{item.name || item.model}</p><p className="text-xs text-slate-500">{masterTab==='motoristas'?item.cnh:masterTab==='veiculos'?item.plate:masterTab==='salas'?'Capacidade: '+(item.capacity||'—')+' · '+(item.location||''):masterTab==='equipes'?(item.members||'—')+' integrantes':masterTab==='locais'?item.description:item.shift}</p></div>
+            <div className="flex shrink-0 gap-2"><button onClick={()=>editMaster(item)} className="rounded border px-2 py-1 text-xs">Editar</button><button onClick={()=>deleteMaster(item.id)} className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-700"><Trash2 className="h-3 w-3"/></button></div>
+          </div>)}
+        </div>
+      </section>
       <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900">
         <div className="flex items-center gap-2 font-semibold"><Clock className="h-4 w-4" /> Regra de contagem do SLA</div>
         <p className="mt-1">Dias úteis, de segunda a sexta-feira, das 08h às 18h, excluindo feriados nacionais e municipais de Belo Horizonte. Cada dia útil equivale a 10 horas de expediente.</p>
