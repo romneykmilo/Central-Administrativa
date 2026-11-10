@@ -20,9 +20,9 @@ export const SettingsModule: React.FC = () => {
     event.preventDefault();
     const id = editingId || (masterTab + '-' + Date.now());
     if (!name.trim()) return;
-    if (masterTab === 'motoristas') saveDriver({ id, name: name.trim(), cnh: detail, phone: extra, status: 'disponivel', rating: 5 });
-    if (masterTab === 'veiculos') saveVehicle({ id, model: name.trim(), plate: detail.toUpperCase(), year: Number(extra) || new Date().getFullYear(), status: 'disponivel', currentKm: 0, fuelLevel: 'Não informado', lastMaintenance: '', nextRevisionKm: 0 });
-    if (masterTab === 'garcons') saveWaiter({ id, name: name.trim(), shift: 'integral', status: 'disponivel', specialties: [] });
+    if (masterTab === 'motoristas') { const current = drivers.find(x => x.id === id); saveDriver({ ...(current || {}), id, name: name.trim(), cnh: detail, phone: extra, status: current?.status || 'disponivel', rating: current?.rating ?? 5 }); }
+    if (masterTab === 'veiculos') { const current = vehicles.find(x => x.id === id); saveVehicle({ ...(current || {}), id, model: name.trim(), plate: detail.toUpperCase(), year: Number(extra) || current?.year || new Date().getFullYear(), status: current?.status || 'disponivel', currentKm: current?.currentKm ?? 0, fuelLevel: current?.fuelLevel || 'Não informado', lastMaintenance: current?.lastMaintenance || '', nextRevisionKm: current?.nextRevisionKm ?? 0 }); }
+    if (masterTab === 'garcons') { const current = waiters.find(x => x.id === id); saveWaiter({ ...(current || {}), id, name: name.trim(), shift: current?.shift || 'integral', status: current?.status || 'disponivel', specialties: current?.specialties || [] }); }
     if (masterTab === 'salas') saveMeetingRoom({ id, name: name.trim(), capacity: Number(detail) || undefined, location: extra, active: true });
     if (masterTab === 'locais') saveServiceLocation({ id, name: name.trim(), description: detail, active: true });
     if (masterTab === 'equipes') saveCleaningTeam({ id, name: name.trim(), members: Number(detail) || undefined, active: true });
