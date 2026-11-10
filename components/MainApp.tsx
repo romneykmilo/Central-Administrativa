@@ -14,6 +14,7 @@ import { ServiceCenter } from '@/components/modules/ServiceCenter';
 import { DashboardView } from '@/components/modules/DashboardView';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
 import { LogisticsModule } from '@/components/modules/LogisticsModule';
+import { AtendimentoModule } from '@/components/modules/AtendimentoModule';
 import { GEDAndContractsModule } from '@/components/modules/GEDAndContractsModule';
 import { PurchasesAndInventoryModule } from '@/components/modules/PurchasesAndInventoryModule';
 import { FacilitiesAndAssetsModule } from '@/components/modules/FacilitiesAndAssetsModule';
@@ -56,7 +57,7 @@ export function MainApp() {
       case 'obras':
         return <FacilitiesAndAssetsModule initialTab="obras" />;
       case 'atendimento':
-        return <OperationsAndFacilitiesModule initialType="atendimento" />;
+        return <AtendimentoModule />;
       case 'manutencao':
         return <OperationsAndFacilitiesModule initialType="manutencao" />;
       case 'telefonia':
