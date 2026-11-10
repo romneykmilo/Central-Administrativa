@@ -195,9 +195,9 @@ export const SchedulingModule: React.FC = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agendamentos de Recursos</h1>
-          <p className="mt-1 text-sm text-slate-500">Agenda integrada de motoristas e veículos da frota, além dos demais recursos.</p>
+          <p className="mt-1 text-sm text-slate-500">Solicitações de motorista, garçom e limpeza, sujeitas à aprovação da gestão.</p>
         </div>
-        <button onClick={() => openModal(activeTab === 'motorista' ? 'motorista' : 'garcom')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+        <button onClick={() => openModal(activeTab)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
           <Plus className="h-4 w-4" /> Novo agendamento
         </button>
       </div>
@@ -206,15 +206,12 @@ export const SchedulingModule: React.FC = () => {
         <button onClick={() => setActiveTab('motorista')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'motorista' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Truck className="mr-1 inline h-4 w-4" /> Agendamento Motorista
         </button>
-        <button onClick={() => setActiveTab('outros')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'outros' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
-          Outros recursos
-        </button>
-        {activeTab === 'outros' && (
-          <div className="ml-auto flex gap-2">
-            <button onClick={() => openModal('garcom')} className="rounded-md border px-3 py-1.5 text-xs">Agendar garçom</button>
-            <button onClick={() => openModal('sala')} className="rounded-md border px-3 py-1.5 text-xs">Agendar sala</button>
-          </div>
-        )}
+        <button onClick={() => setActiveTab('garcom')} className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Agendamento Garçom</button>
+        <button onClick={() => setActiveTab('limpeza')} className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Agendamento Limpeza</button>
+        <div className="ml-auto flex gap-2">
+          {activeTab === 'garcom' && <button onClick={() => openModal('garcom')} className="rounded-md border px-3 py-1.5 text-xs">Agendar garçom</button>}
+          {activeTab === 'limpeza' && <button onClick={() => openModal('limpeza')} className="rounded-md border px-3 py-1.5 text-xs">Agendar limpeza</button>}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
