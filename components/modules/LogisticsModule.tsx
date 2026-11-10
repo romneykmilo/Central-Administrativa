@@ -3,18 +3,20 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
-import { Truck, Car, Package, Send, MapPin, ArrowRightLeft, Boxes, Mail, ClipboardList } from 'lucide-react';
+import { Truck, Car, Package, Send, Boxes, Mail } from 'lucide-react';
 
 type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'cargas' | 'malote';
 
 export const LogisticsModule: React.FC = () => {
-  const { vehicles, openNewTicketWithPrefill } = useApp();
+  const { vehicles, openNewTicketWithPrefill, serviceSlaPolicies } = useApp();
   const [activeSub, setActiveSub] = useState<LogisticsService>('motorista');
   const [origin, setOrigin] = useState('Sede Administrativa');
   const [destination, setDestination] = useState('');
   const [recipient, setRecipient] = useState('');
   const [deliveryType, setDeliveryType] = useState('Motoboy dedicado');
   const [notes, setNotes] = useState('');
+
+  const getSlaLabel = (serviceName: string) => { const policy = serviceSlaPolicies.find(item => item.serviceName === serviceName && item.active); return policy ? `Prazo de atendimento: ${policy.businessDays} ${policy.businessDays === 1 ? 'dia útil' : 'dias úteis'}.` : 'Prazo de atendimento não cadastrado no momento.'; };
 
   const requestTicket = (serviceName: string, title: string, guidance: string) => {
     openNewTicketWithPrefill({
@@ -90,7 +92,7 @@ export const LogisticsModule: React.FC = () => {
               <ul className="mt-2 list-disc space-y-1 pl-5"><li>Data e horário de retirada e devolução</li><li>Local de retirada e devolução</li><li>Categoria do veículo e quantidade de passageiros</li><li>Destino, período de utilização e justificativa</li></ul>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 4 dias úteis.</span>
+              <span className="text-[11px] text-slate-500">{getSlaLabel('Locação de Veículos')}</span>
               <button onClick={() => requestTicket('Locação de Veículos','Solicitação de locação de veículo','Informe: período de utilização (retirada e devolução), local de retirada/devolução, categoria do veículo, quantidade de passageiros, destino e justificativa da locação.')}
                 className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar locação <Send className="h-4 w-4" /></button>
             </div>
@@ -123,7 +125,7 @@ export const LogisticsModule: React.FC = () => {
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-start gap-3"><Boxes className="mt-0.5 h-5 w-5 text-blue-600"/><div><h2 className="text-sm font-semibold text-slate-900">Solicitar transporte de cargas</h2><p className="mt-1 text-xs leading-5 text-slate-600">Para movimentação de materiais, mobiliário, equipamentos, documentos em volume ou outros itens que exijam transporte dedicado.</p></div></div>
           <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600"><p className="font-semibold text-slate-700">Antes de solicitar, reúna:</p><ul className="mt-2 list-disc space-y-1 pl-5"><li>Descrição, quantidade e dimensões aproximadas dos itens</li><li>Endereço de origem e destino</li><li>Data desejada e necessidade de ajudantes</li><li>Condições de acesso, carga e descarga</li></ul></div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 4 dias úteis.</span><button onClick={()=>requestTicket('Transporte de Cargas','Solicitação de transporte de cargas','Informe descrição dos itens, quantidade, dimensões e peso aproximados, endereço de origem e destino, data desejada, necessidade de ajudantes e condições de carga/descarga.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar transporte <Send className="h-4 w-4"/></button></div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">{getSlaLabel('Transporte de Cargas')}</span><button onClick={()=>requestTicket('Transporte de Cargas','Solicitação de transporte de cargas','Informe descrição dos itens, quantidade, dimensões e peso aproximados, endereço de origem e destino, data desejada, necessidade de ajudantes e condições de carga/descarga.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar transporte <Send className="h-4 w-4"/></button></div>
         </div>
       )}
 
@@ -131,7 +133,7 @@ export const LogisticsModule: React.FC = () => {
         <div className="rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-start gap-3"><Mail className="mt-0.5 h-5 w-5 text-blue-600"/><div><h2 className="text-sm font-semibold text-slate-900">Solicitar envio por malote corporativo</h2><p className="mt-1 text-xs leading-5 text-slate-600">Para circulação programada de documentos e pequenos volumes entre unidades, departamentos ou endereços atendidos pelo serviço de malote.</p></div></div>
           <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-600"><p className="font-semibold text-slate-700">Informações necessárias</p><ul className="mt-2 list-disc space-y-1 pl-5"><li>Unidade ou setor de origem e destino</li><li>Nome do destinatário e contato</li><li>Descrição e quantidade de volumes</li><li>Data desejada e observações de entrega</li></ul></div>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">Prazo de atendimento cadastrado: 2 dias úteis.</span><button onClick={()=>requestTicket('Malote Corporativo','Solicitação de malote corporativo','Informe unidade/setor de origem e destino, destinatário e contato, descrição e quantidade de volumes, data desejada e orientações especiais de entrega.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar malote <Send className="h-4 w-4"/></button></div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">{getSlaLabel('Malote Corporativo')}</span><button onClick={()=>requestTicket('Malote Corporativo','Solicitação de malote corporativo','Informe unidade/setor de origem e destino, destinatário e contato, descrição e quantidade de volumes, data desejada e orientações especiais de entrega.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar malote <Send className="h-4 w-4"/></button></div>
         </div>
       )}
     </div>
