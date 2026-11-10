@@ -480,6 +480,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newSchedule: ResourceSchedule = {
       ...scheduleData,
       id: `sch-${Date.now()}`,
+      status: 'pendente',
     };
 
     setSchedules((prev) => [newSchedule, ...prev]);
