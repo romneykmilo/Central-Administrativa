@@ -83,7 +83,7 @@ export interface Ticket {
   attachments?: { name: string; size: string; type: string }[];
 }
 
-export type ResourceType = 'motorista' | 'veiculo' | 'garcom' | 'sala' | 'equipamento';
+export type ResourceType = 'motorista' | 'veiculo' | 'garcom' | 'sala' | 'limpeza' | 'equipamento';
 
 export interface ResourceSchedule {
   id: string;
@@ -99,7 +99,18 @@ export interface ResourceSchedule {
   location: string;
   passengersOrGuests?: number;
   notes?: string;
-  status: 'confirmado' | 'pendente' | 'cancelado';
+  status: 'confirmado' | 'pendente' | 'rejeitado' | 'cancelado';
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  serviceMode?: 'montado' | 'volante';
+  setupDateTime?: string;
+  eventDateTime?: string;
+  cleaningTeamId?: string;
+  cleaningTeamName?: string;
+  roomId?: string;
+  roomName?: string;
+  endTime?: string;
   driverId?: string;
   driverName?: string;
   vehicleId?: string;
@@ -282,4 +293,27 @@ export interface ServiceSlaChange {
   newActive: boolean;
   changedAt: string;
   changedBy: string;
+}
+
+
+export interface MeetingRoom {
+  id: string;
+  name: string;
+  capacity?: number;
+  location?: string;
+  active: boolean;
+}
+
+export interface ServiceLocation {
+  id: string;
+  name: string;
+  description?: string;
+  active: boolean;
+}
+
+export interface CleaningTeam {
+  id: string;
+  name: string;
+  members?: number;
+  active: boolean;
 }
