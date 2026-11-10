@@ -459,11 +459,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createSchedule = (scheduleData: Omit<ResourceSchedule, 'id'>) => {
     const startA = new Date(scheduleData.startDateTime).getTime();
     const endA = new Date(scheduleData.endDateTime).getTime();
-    const requestedResourceIds = [scheduleData.resourceId, scheduleData.driverId, scheduleData.vehicleId].filter(Boolean) as string[];
+    const requestedResourceIds = [scheduleData.resourceId, scheduleData.driverId, scheduleData.vehicleId, scheduleData.roomId, scheduleData.cleaningTeamId].filter(Boolean) as string[];
 
     const conflict = schedules.find((s) => {
       if (s.status === 'cancelado' || s.status === 'rejeitado') return false;
-      const existingResourceIds = [s.resourceId, s.driverId, s.vehicleId].filter(Boolean) as string[];
+      const existingResourceIds = [s.resourceId, s.driverId, s.vehicleId, s.roomId, s.cleaningTeamId].filter(Boolean) as string[];
       if (!requestedResourceIds.some((id) => existingResourceIds.includes(id))) return false;
       const startB = new Date(s.startDateTime).getTime();
       const endB = new Date(s.endDateTime).getTime();
