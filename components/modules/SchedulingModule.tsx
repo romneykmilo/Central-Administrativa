@@ -89,48 +89,55 @@ export const SchedulingModule: React.FC = () => {
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const start = localDateTime(startDate, startTime);
-    const end = resourceType === 'motorista' ? bookingEnd : localDateTime(dropoffDate, dropoffTime);
+    const isDriverBooking = resourceType === 'motorista';
+    const selectedDriver = drivers.find(item => item.id === driverId);
+    const selectedVehicle = vehicles.find(item => item.id === vehicleId);
+    const selectedWaiter = waiters.find(item => item.id === otherResourceId);
+    const selectedRoom = meetingRooms.find(item => item.id === roomId);
+    const selectedTeam = cleaningTeams.find(item => item.id === cleaningTeamId);
+    let start: Date;
+    let end: Date;
+    let resourceId = '';
+    let resourceName = '';
+    let scheduleLocation = location || 'A definir';
+    let extraData: Partial<ResourceSchedule> = {};
+    if (isDriverBooking) {
+      start = localDateTime(startDate, startTime);
+      end = bookingEnd;
+      resourceId = driverId;
+      resourceName = selectedDriver?.name || 'Motorista';
+      scheduleLocation = origin + ' → ' + destination;
+      extraData = { driverId, driverName: selectedDriver?.name, vehicleId, vehicleName: selectedVehicle ? selectedVehicle.model + ' - ' + selectedVehicle.plate : '', tripRequesterName, costCenter, passengerName, origin, destination, tripMode, passengerDropoffDateTime: localDateTime(dropoffDate, dropoffTime).toISOString(), waitingUntil: tripMode === 'aguardar' ? end.toISOString() : undefined };
+    } else if (resourceType === 'garcom') {
+      const event = localDateTime(startDate, eventTime);
+      start = serviceMode === 'montado' ? localDateTime(startDate, setupTime) : event;
+      end = plusMinutes(event, 60);
+      resourceId = otherResourceId;
+      resourceName = selectedWaiter?.name || 'Garçom';
+      scheduleLocation = selectedRoom?.name || 'Sala não informada';
+      extraData = { eventDateTime: event.toISOString(), setupDateTime: serviceMode === 'montado' ? start.toISOString() : undefined, serviceMode, roomId, roomName: selectedRoom?.name };
+    } else {
+      start = localDateTime(startDate, cleaningStartTime);
+      end = localDateTime(startDate, cleaningEndTime);
+      resourceId = cleaningTeamId;
+      resourceName = selectedTeam?.name || 'Equipe de limpeza';
+      scheduleLocation = location;
+      extraData = { cleaningTeamId, cleaningTeamName: selectedTeam?.name, endTime: cleaningEndTime };
+    }
+    if (!resourceId || (resourceType === 'garcom' && !roomId) || (resourceType === 'limpeza' && !location)) {
+      setFormConflictWarning('Preencha os recursos e locais obrigatórios cadastrados em Configurações.');
+      return;
+    }
     if (end <= start) {
       setFormConflictWarning('O horário de término deve ser posterior ao horário de início.');
       return;
     }
-    const selectedDriver = drivers.find(item => item.id === driverId);
-    const selectedVehicle = vehicles.find(item => item.id === vehicleId);
-    const selectedWaiter = waiters.find(item => item.id === otherResourceId);
-    const isDriverBooking = resourceType === 'motorista';
-    const resourceId = isDriverBooking ? driverId : otherResourceId;
-    const resourceName = isDriverBooking
-      ? (selectedDriver?.name || 'Motorista') 
-      : resourceType === 'garcom' ? (selectedWaiter?.name || 'Garçom') : 'Sala / Auditório';
     const result = createSchedule({
-      title: title || (isDriverBooking ? `Corrida - ${passengerName || 'Passageiro'}` : `Reserva - ${resourceName}`),
-      resourceType,
-      resourceId,
-      resourceName,
-      requesterId: currentUser.id,
-      requesterName: currentUser.name,
-      department: currentUser.department,
-      startDateTime: start.toISOString(),
-      endDateTime: end.toISOString(),
-      location: isDriverBooking ? `${origin} → ${destination}` : (location || 'A definir'),
-      passengersOrGuests: isDriverBooking ? 1 : undefined,
-      notes,
-      status: 'confirmado',
-      ...(isDriverBooking ? {
-        driverId,
-        driverName: selectedDriver?.name,
-        vehicleId,
-        vehicleName: selectedVehicle ? `${selectedVehicle.model} - ${selectedVehicle.plate}` : '',
-        tripRequesterName,
-        costCenter,
-        passengerName,
-        origin,
-        destination,
-        tripMode,
-        passengerDropoffDateTime: localDateTime(dropoffDate, dropoffTime).toISOString(),
-        waitingUntil: tripMode === 'aguardar' ? end.toISOString() : undefined,
-      } : {}),
+      title: title || (isDriverBooking ? 'Corrida - ' + (passengerName || 'Passageiro') : resourceType === 'garcom' ? 'Atendimento de garçom' : 'Serviço de limpeza'),
+      resourceType, resourceId, resourceName,
+      requesterId: currentUser.id, requesterName: currentUser.name, department: currentUser.department,
+      startDateTime: start.toISOString(), endDateTime: end.toISOString(), location: scheduleLocation,
+      notes, status: 'pendente', ...extraData,
     });
     if (result.success) setIsModalOpen(false);
     else setFormConflictWarning(result.conflict || 'Conflito detectado.');
