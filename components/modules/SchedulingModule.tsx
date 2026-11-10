@@ -178,13 +178,18 @@ export const SchedulingModule: React.FC = () => {
   const sortedSchedules = [...visibleSchedules].sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
 
   const renderSchedule = (schedule: ResourceSchedule, compact = false) => {
-    const cancelled = schedule.status === 'cancelado';
+    const cancelled = schedule.status === 'cancelado' || schedule.status === 'rejeitado';
+    const canApprove = currentUser.role === 'admin' || currentUser.role === 'manager';
     return (
       <div key={schedule.id} className={`rounded-md border px-2 py-1.5 text-[11px] ${cancelled ? 'border-slate-200 bg-slate-100 opacity-60' : 'border-blue-200 bg-blue-50 text-blue-900'}`}>
         <div className="font-semibold truncate">{formatTime(schedule.startDateTime)} · {schedule.title}</div>
         {!compact && <div className="mt-0.5 truncate">{schedule.driverName || schedule.resourceName}{schedule.vehicleName ? ` | ${schedule.vehicleName}` : ''}</div>}
         {!compact && schedule.passengerName && <div className="truncate">Passageiro: {schedule.passengerName}</div>}
+        {!compact && schedule.eventDateTime && <div>Evento: {formatTime(schedule.eventDateTime)} · {schedule.serviceMode === 'montado' ? 'Montado' : 'Volante'}</div>}
+        {!compact && schedule.cleaningTeamName && <div>Equipe: {schedule.cleaningTeamName} · até {schedule.endTime}</div>}
+        {!compact && <div className="font-semibold">Status: {schedule.status === 'pendente' ? 'Aguardando aprovação' : schedule.status === 'confirmado' ? 'Aprovado' : schedule.status === 'rejeitado' ? 'Rejeitado' : 'Cancelado'}</div>}
         {!compact && schedule.tripMode && <div>{schedule.tripMode === 'aguardar' ? `Aguardar até ${formatTime(schedule.waitingUntil)}` : 'Somente levar · +40 min de retorno'}</div>}
+        {!cancelled && schedule.status === 'pendente' && canApprove && <div className="mt-1 flex gap-3"><button type="button" onClick={() => approveSchedule(schedule.id)} className="text-emerald-700 hover:underline">Aprovar</button><button type="button" onClick={() => rejectSchedule(schedule.id)} className="text-rose-700 hover:underline">Rejeitar</button></div>}
         {!cancelled && <button type="button" onClick={() => cancelSchedule(schedule.id)} className="mt-1 text-rose-700 hover:underline">Cancelar</button>}
       </div>
     );
@@ -229,7 +234,7 @@ export const SchedulingModule: React.FC = () => {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-3">
-        <div className="mb-3 flex items-center gap-2 text-xs text-slate-600"><CheckCircle2 className="h-4 w-4 text-emerald-600" /> Conflitos são verificados para motorista e veículo durante todo o período de bloqueio.</div>
+        <div className="mb-3 flex items-center gap-2 text-xs text-slate-600"><CheckCircle2 className="h-4 w-4 text-emerald-600" /> Solicitações pendentes e aprovadas reservam os recursos e impedem conflitos de horário.</div>
         {viewMode === 'lista' ? (
           <div className="space-y-2">{sortedSchedules.length ? sortedSchedules.map(item => renderSchedule(item)) : <p className="py-10 text-center text-sm text-slate-500">Nenhum agendamento neste filtro.</p>}</div>
         ) : viewMode === 'mes' ? (
