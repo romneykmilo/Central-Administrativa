@@ -12,7 +12,7 @@ const localDateTime = (date: string, time: string) => new Date(`${date}T${time}:
 const plusMinutes = (date: Date, minutes: number) => new Date(date.getTime() + minutes * 60000);
 const formatTime = (value?: string) => value ? new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
-export const SchedulingModule: React.FC = () => {
+export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean }> = ({ embeddedDriverOnly = false }) => {
   const { schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, createSchedule, cancelSchedule, approveSchedule, rejectSchedule, currentUser } = useApp();
   const [viewMode, setViewMode] = useState<CalendarMode>('mes');
   const [activeTab, setActiveTab] = useState<'motorista' | 'garcom' | 'limpeza'>('motorista');
@@ -197,6 +197,7 @@ export const SchedulingModule: React.FC = () => {
 
   return (
     <div className="space-y-5">
+      {!embeddedDriverOnly && (
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agendamentos de Recursos</h1>
@@ -207,6 +208,9 @@ export const SchedulingModule: React.FC = () => {
         </button>
       </div>
 
+      )}
+
+      {!embeddedDriverOnly && (
       <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
         <button onClick={() => setActiveTab('motorista')} className={`rounded-lg px-3 py-2 text-sm font-semibold ${activeTab === 'motorista' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Truck className="mr-1 inline h-4 w-4" /> Agendamento Motorista
@@ -218,6 +222,8 @@ export const SchedulingModule: React.FC = () => {
           {activeTab === 'limpeza' && <button onClick={() => openModal('limpeza')} className="rounded-md border px-3 py-1.5 text-xs">Agendar limpeza</button>}
         </div>
       </div>
+
+      )}
 
       <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
