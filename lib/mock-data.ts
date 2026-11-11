@@ -953,6 +953,7 @@ export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Atendimento', serviceName: 'Vigilância & Portaria', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Solicitações para Portaria', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Serviços Externos', workflowType: 1 },
+  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Atendimento de Eventos', workflowType: 1 },
   { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', workflowType: 1 },
   { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', workflowType: 1 },
   { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', workflowType: 1 },
