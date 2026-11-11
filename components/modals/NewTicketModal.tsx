@@ -108,8 +108,8 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
               onChange={(e) => handleCategoryChange(e.target.value as ServiceCategory)}
               className="w-full text-xs font-medium bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="logistica">Logística e Frotas</option>
-              <option value="atendimento">Atendimento (Limpeza, copa e portaria)</option>
+              <option value="logistica">Logística e Transporte</option>
+              <option value="atendimento">Atendimento</option>
               <option value="manutencao">Manutenção Predial</option>
               <option value="viagens">Viagens e Passagens</option>
               <option value="telefonia">Telefonia e Celular</option>
