@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { TicketStatus, TicketPriority } from '@/types';
+import { TicketOperationalStatus } from '@/types';
 import { getBusinessMinutesBetween } from '@/lib/mock-data';
 import {
   X,
@@ -25,7 +25,7 @@ export const TicketDetailModal: React.FC = () => {
   const {
     selectedTicket,
     setSelectedTicketId,
-    updateTicketStatus,
+    updateTicketOperationalStatus,
     addTicketComment,
     assignTicket,
     approveManagerWorkflow,
@@ -74,10 +74,6 @@ export const TicketDetailModal: React.FC = () => {
     }
   }
 
-  const handleStatusChange = (newStatus: TicketStatus) => {
-    updateTicketStatus(selectedTicket.id, newStatus);
-  };
-
   const handleSendComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
@@ -85,17 +81,24 @@ export const TicketDetailModal: React.FC = () => {
     setCommentText('');
   };
 
-  const statusOptions: { id: TicketStatus; label: string; color: string }[] = [
-    { id: 'novo', label: 'Novo', color: 'bg-slate-100 text-slate-800' },
-    { id: 'em_analise', label: 'Em Análise', color: 'bg-blue-100 text-blue-800' },
-    { id: 'aguardando_info', label: 'Aguardando Informação', color: 'bg-amber-100 text-amber-800' },
-    { id: 'aguardando_aprovacao', label: 'Aguardando Aprovação do Gestor', color: 'bg-purple-100 text-purple-800' },
-    { id: 'aguardando_aprovacao_solicitante', label: 'Aguardando Aprovação do Solicitante', color: 'bg-fuchsia-100 text-fuchsia-800' },
-    { id: 'agendado', label: 'Agendado', color: 'bg-cyan-100 text-cyan-800' },
-    { id: 'em_andamento', label: 'Em Andamento', color: 'bg-indigo-100 text-indigo-800' },
-    { id: 'concluido', label: 'Concluído', color: 'bg-emerald-100 text-emerald-800' },
-    { id: 'cancelado', label: 'Cancelado', color: 'bg-rose-100 text-rose-800' },
+  const operationalStatusOptions: { id: TicketOperationalStatus; label: string }[] = [
+    { id: 'novo', label: 'Novo' },
+    { id: 'em_analise', label: 'Em análise' },
+    { id: 'em_atendimento', label: 'Em atendimento' },
+    { id: 'aguardando_fornecedor', label: 'Aguardando fornecedor' },
+    { id: 'agendado', label: 'Agendado' },
+    { id: 'aguardando_informacoes', label: 'Aguardando informações' },
+    { id: 'aguardando_aprovacao_gestor', label: 'Aguardando aprovação do gestor' },
+    { id: 'aguardando_aprovacao_solicitante', label: 'Aguardando aprovação do solicitante' },
+    { id: 'concluido', label: 'Concluído' },
+    { id: 'cancelado', label: 'Cancelado' },
   ];
+  const operationalStatus = selectedTicket.operationalStatus || (
+    selectedTicket.status === 'em_andamento' ? 'em_atendimento' :
+    selectedTicket.status === 'aguardando_info' ? 'aguardando_informacoes' :
+    selectedTicket.status === 'aguardando_aprovacao' ? 'aguardando_aprovacao_gestor' :
+    selectedTicket.status
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
@@ -276,16 +279,29 @@ export const TicketDetailModal: React.FC = () => {
 
           {/* Right Column: Metadata & Controls (1 span) */}
           <div className="p-6 bg-slate-50/50 space-y-6">
+            {/* Status operacional independente da etapa do fluxo */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">Status operacional</label>
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-900">
+                {operationalStatusOptions.find((item) => item.id === operationalStatus)?.label || 'Em análise'}
+              </div>
+              {['admin', 'manager', 'attendant'].includes(currentUser.role) && !['concluido', 'cancelado', 'aguardando_aprovacao', 'aguardando_aprovacao_solicitante'].includes(selectedTicket.status) && (
+                <select
+                  value={operationalStatus}
+                  onChange={(event) => updateTicketOperationalStatus(selectedTicket.id, event.target.value as TicketOperationalStatus)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700"
+                >
+                  {operationalStatusOptions.filter((item) => !['aguardando_aprovacao_gestor', 'aguardando_aprovacao_solicitante'].includes(item.id) && ((selectedTicket.workflowType || 1) === 1 || !['concluido', 'cancelado'].includes(item.id))).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                </select>
+              )}
+              <p className="text-[11px] text-slate-500">A equipe responsável atualiza o andamento. As aprovações continuam sendo controladas pelo fluxo do atendimento.</p>
+            </div>
+
             {/* Etapas do fluxo configurado para o serviço */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Fluxo do atendimento · Tipo {selectedTicket.workflowType || 1}</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Etapa do fluxo · Tipo {selectedTicket.workflowType || 1}</label>
               {(selectedTicket.workflowType || 1) === 1 && (
-                <div className="space-y-1">
-                  {statusOptions.filter((st) => !['aguardando_aprovacao', 'aguardando_aprovacao_solicitante'].includes(st.id)).map((st) => {
-                    const isCurrent = selectedTicket.status === st.id;
-                    return <button key={st.id} onClick={() => handleStatusChange(st.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border text-left transition-colors ${isCurrent ? 'bg-slate-900 text-white border-slate-900' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'}`}><span>{st.label}</span>{isCurrent && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}</button>;
-                  })}
-                </div>
+                <p className="text-xs text-slate-600">Atendimento direto: a equipe atualiza o status operacional até a conclusão.</p>
               )}
               {(selectedTicket.workflowType || 1) === 2 && (
                 <div className="space-y-2">
