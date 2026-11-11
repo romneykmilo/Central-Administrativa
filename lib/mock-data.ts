@@ -942,25 +942,18 @@ export const MOCK_NOTIFICATIONS: NotificationItem[] = [
 
 // Prazos de atendimento definidos para os serviços da Central Administrativa.
 export const SERVICE_WORKFLOW_POLICIES = [
-  { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', workflowType: 2 },
-  { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', workflowType: 3 },
+  { category: 'Logística e Transporte', serviceName: 'Motorista Executivo', workflowType: 2 },
+  { category: 'Logística e Transporte', serviceName: 'Locação de Veículos', workflowType: 3 },
   { category: 'Correios', serviceName: 'Correios', workflowType: 1 },
   { category: 'Correios', serviceName: 'Motoboy', workflowType: 1 },
-  { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', workflowType: 2 },
-  { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', workflowType: 1 },
+  { category: 'Logística e Transporte', serviceName: 'Transporte de Cargas', workflowType: 2 },
+  { category: 'Logística e Transporte', serviceName: 'Malote Corporativo', workflowType: 1 },
   { category: 'Atendimento', serviceName: 'Limpeza & Higienização', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Copa & Garçom', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Vigilância & Portaria', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Solicitações para Portaria', workflowType: 2 },
   { category: 'Atendimento', serviceName: 'Serviços Externos', workflowType: 1 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Atendimento de Eventos', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', workflowType: 1 },
+  { category: 'Atendimento', serviceName: 'Atendimento de Eventos', workflowType: 1 },
   { category: 'Telefonia e Celular', serviceName: 'Solicitação de Linha Nova', workflowType: 2 },
   { category: 'Telefonia e Celular', serviceName: 'Substituição de Aparelho Smartphone', workflowType: 2 },
   { category: 'Telefonia e Celular', serviceName: 'Roaming Internacional', workflowType: 2 },
@@ -974,26 +967,21 @@ export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
 ] as const;
 
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', workflowType: 1 },
+
 export const SERVICE_SLA_POLICIES = [
-  { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', businessDays: 2 },
-  { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', businessDays: 4 },
+  { category: 'Logística e Transporte', serviceName: 'Motorista Executivo', businessDays: 2 },
+  { category: 'Logística e Transporte', serviceName: 'Locação de Veículos', businessDays: 4 },
   { category: 'Correios', serviceName: 'Correios', businessDays: 1 },
   { category: 'Correios', serviceName: 'Motoboy', businessDays: 1 },
-  { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', businessDays: 4 },
-  { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', businessDays: 2 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Limpeza & Higienização', businessDays: 2 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Copa & Garçom', businessDays: 1 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Vigilância & Portaria', businessDays: 1 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Serviços Externos', businessDays: 2 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Atendimento de Eventos', businessDays: 4 },
-  { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Solicitações para Portaria', businessDays: 2 },
-  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', businessDays: 5 },
-  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', businessDays: 5 },
+  { category: 'Logística e Transporte', serviceName: 'Transporte de Cargas', businessDays: 4 },
+  { category: 'Logística e Transporte', serviceName: 'Malote Corporativo', businessDays: 2 },
+  { category: 'Atendimento', serviceName: 'Limpeza & Higienização', businessDays: 2 },
+  { category: 'Atendimento', serviceName: 'Copa & Garçom', businessDays: 1 },
+  { category: 'Atendimento', serviceName: 'Vigilância & Portaria', businessDays: 1 },
+  { category: 'Atendimento', serviceName: 'Serviços Externos', businessDays: 2 },
+  { category: 'Atendimento', serviceName: 'Atendimento de Eventos', businessDays: 4 },
+  { category: 'Atendimento', serviceName: 'Solicitações para Portaria', businessDays: 2 },
   { category: 'Viagens e Passagens', serviceName: 'Passagens Aéreas', businessDays: 2 },
   { category: 'Viagens e Passagens', serviceName: 'Reserva de Hotel / Hospedagem', businessDays: 2 },
   { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', businessDays: 4 },
@@ -1006,6 +994,8 @@ export const SERVICE_SLA_POLICIES = [
   { category: 'Telefonia e Celular', serviceName: 'Ramal / PABX', businessDays: 1 },
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', businessDays: 4 },
 ] as const;
+
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', businessDays: 5 },
 
 const normalizeServiceName = (value: string) =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
