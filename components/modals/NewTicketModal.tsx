@@ -6,9 +6,9 @@ import { ServiceCategory, TicketPriority, Ticket } from '@/types';
 import { X, Clock, UploadCloud } from 'lucide-react';
 
 const servicesByCategory: Partial<Record<ServiceCategory, string[]>> = {
-  logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios & Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
+  logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios', 'Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
   atendimento: ['Limpeza & Higienização', 'Copa & Garçom', 'Vigilância & Portaria', 'Serviços Externos', 'Atendimento de Eventos', 'Solicitações para Portaria'],
-  manutencao: ['Climatização e Ar-Condicionado', 'Instalações Elétricas', 'Hidráulica Predial', 'Reparo Civil', 'Manutenção de Mobiliário', 'Manutenção Preventiva', 'Mudança de Layout'],
+  manutencao: ['Manutenção Predial'],
   viagens: ['Passagens Aéreas', 'Reserva de Hotel / Hospedagem', 'Locação de Veículo para Viagem', 'Seguro Viagem', 'Adiantamento de Diárias'],
   telefonia: ['Solicitação de Linha Nova', 'Substituição de Aparelho Smartphone', 'Roaming Internacional', 'Chip Corporativo', 'Ramal / PABX'],
   compras: ['Cotação Direta'],
@@ -50,7 +50,9 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
     setAttachedFiles((prev) => [...prev, mockFile]);
   };
 
-  const activeServices = (servicesByCategory[category] || []).filter((name) => serviceSlaPolicies.some((policy) => policy.serviceName === name && policy.active));
+  const configuredCorreiosServices = serviceSlaPolicies.filter(policy => policy.active && policy.category === 'Correios').map(policy => policy.serviceName).filter(name => name !== 'Motoboy');
+  const categoryServices = category === 'logistica' ? [...(servicesByCategory.logistica || []).filter(name => !['Correios', 'Correios & Motoboy'].includes(name)), ...configuredCorreiosServices, 'Motoboy'] : (servicesByCategory[category] || []);
+  const activeServices = categoryServices.filter((name) => serviceSlaPolicies.some((policy) => policy.serviceName === name && policy.active));
   const slaDays = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active)?.businessDays;
 
   React.useEffect(() => {
