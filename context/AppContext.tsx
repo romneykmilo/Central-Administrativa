@@ -68,6 +68,7 @@ interface AppContextType {
   serviceSlaPolicies: ServiceSlaPolicy[];
   serviceWorkflowPolicies: ServiceWorkflowPolicy[];
   updateServiceWorkflowPolicy: (serviceName: string, workflowType: ServiceWorkflowType) => void;
+  addCorreiosService: (serviceName: string, businessDays: number) => void;
   approveManagerWorkflow: (ticketId: string) => void;
   submitTicketForRequesterApproval: (ticketId: string) => void;
   respondToRequesterApproval: (ticketId: string, approved: boolean, note: string) => void;
@@ -176,9 +177,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [serviceSlaPolicies, setServiceSlaPolicies] = useState<ServiceSlaPolicy[]>(() => {
     const stored = getStoredData();
-    return stored?.serviceSlaPolicies || SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true }));
+    const saved = stored?.serviceSlaPolicies as ServiceSlaPolicy[] | undefined;
+    const legacy = saved?.find(policy => policy.serviceName === 'Correios & Motoboy');
+    const base = (saved || SERVICE_SLA_POLICIES.map(policy => ({ ...policy, active: true }))).filter(policy => policy.serviceName !== 'Correios & Motoboy');
+    return (['Correios', 'Motoboy'] as const).reduce((items, serviceName) => {
+      if (!items.some(policy => policy.serviceName === serviceName)) {
+        const defaults = SERVICE_SLA_POLICIES.find(policy => policy.serviceName === serviceName);
+        if (defaults) items.push({ ...defaults, businessDays: legacy?.businessDays ?? defaults.businessDays, active: legacy?.active ?? true });
+      }
+      return items;
+    }, base);
   });
-  const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => getStoredData()?.serviceWorkflowPolicies || [...SERVICE_WORKFLOW_POLICIES]);
+  const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => {
+    const saved = getStoredData()?.serviceWorkflowPolicies as ServiceWorkflowPolicy[] | undefined;
+    const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy');
+    return base.map(policy => ['Correios', 'Motoboy'].includes(policy.serviceName) ? { ...policy, category: 'Correios' } : policy);
+  });
   const [serviceSlaHistory, setServiceSlaHistory] = useState<ServiceSlaChange[]>(() => getStoredData()?.serviceSlaHistory || []);
 
   const [selectedTicketId, setSelectedTicketIdState] = useState<string | null>(null);
@@ -319,6 +333,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       : policy));
     setServiceSlaHistory((prev) => [change, ...prev]);
     showToast(`Configuração de SLA atualizada: ${serviceName}. Chamados existentes mantêm o prazo original.`);
+  };
+
+  const addCorreiosService = (serviceName: string, businessDays: number) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { showToast('Apenas gestores podem cadastrar serviços.'); return; }
+    const cleanName = serviceName.trim();
+    if (!cleanName) { showToast('Informe o nome do serviço.'); return; }
+    if (serviceWorkflowPolicies.some(policy => policy.serviceName.toLocaleLowerCase() === cleanName.toLocaleLowerCase())) { showToast('Já existe um serviço com esse nome.'); return; }
+    if (!Number.isInteger(businessDays) || businessDays < 1 || businessDays > 365) { showToast('Informe um prazo entre 1 e 365 dias úteis.'); return; }
+    setServiceWorkflowPolicies(prev => [...prev, { category: 'Correios', serviceName: cleanName, workflowType: 1 }]);
+    setServiceSlaPolicies(prev => [...prev, { category: 'Correios', serviceName: cleanName, businessDays, active: true }]);
+    showToast(`Serviço dos Correios "${cleanName}" cadastrado.`);
   };
 
   const updateServiceWorkflowPolicy = (serviceName: string, workflowType: ServiceWorkflowType) => {
@@ -676,6 +701,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         serviceSlaPolicies,
         serviceWorkflowPolicies,
         updateServiceWorkflowPolicy,
+        addCorreiosService,
         approveManagerWorkflow,
         submitTicketForRequesterApproval,
         respondToRequesterApproval,
