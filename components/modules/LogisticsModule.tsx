@@ -16,6 +16,7 @@ export const LogisticsModule: React.FC = () => {
   const [deliveryType, setDeliveryType] = useState('Motoboy dedicado');
   const [selectedCorreiosService, setSelectedCorreiosService] = useState('Correios');
   const correiosServices = serviceSlaPolicies.filter(policy => policy.category === 'Correios' && policy.active);
+  const effectiveCorreiosService = correiosServices.some(policy => policy.serviceName === selectedCorreiosService) ? selectedCorreiosService : (correiosServices[0]?.serviceName || '');
   const [notes, setNotes] = useState('');
 
   const getSlaLabel = (serviceName: string) => { const policy = serviceSlaPolicies.find(item => item.serviceName === serviceName && item.active); return policy ? `Prazo de atendimento: ${policy.businessDays} ${policy.businessDays === 1 ? 'dia útil' : 'dias úteis'}.` : 'Prazo de atendimento não cadastrado no momento.'; };
@@ -37,7 +38,7 @@ export const LogisticsModule: React.FC = () => {
       title: `Envio / coleta: ${destination}`,
       description: `Tipo de serviço: ${activeSub === 'motoboy' ? deliveryType : selectedCorreiosService}\nOrigem: ${origin}\nDestino: ${destination}\nDestinatário / contato: ${recipient || 'Não informado'}\nOrientações: ${notes || 'Não informado'}`,
       category: 'logistica',
-      serviceName: activeSub === 'motoboy' ? 'Motoboy' : selectedCorreiosService,
+      serviceName: activeSub === 'motoboy' ? 'Motoboy' : effectiveCorreiosService,
       priority: 'media',
       location: destination,
     });
@@ -111,11 +112,11 @@ export const LogisticsModule: React.FC = () => {
       {(activeSub === 'correios' || activeSub === 'motoboy') && (
         <div className="max-w-2xl rounded-xl border border-slate-200 bg-white p-5">
           <div className="flex items-start gap-3">{activeSub === 'correios' ? <Package className="mt-0.5 h-5 w-5 text-blue-600" /> : <Send className="mt-0.5 h-5 w-5 text-blue-600" />}<div><h2 className="text-sm font-semibold text-slate-900">{activeSub === 'correios' ? 'Solicitar serviço dos Correios' : 'Solicitar serviço de motoboy'}</h2><p className="mt-1 text-xs text-slate-500">{activeSub === 'correios' ? 'Para correspondências, documentos e encomendas encaminhadas pelos serviços dos Correios.' : 'Para coleta e entrega rápida de documentos, encomendas e materiais por motoboy.'}</p></div></div>
-          <p className="mt-3 text-[11px] text-slate-500">{getSlaLabel(activeSub === 'motoboy' ? 'Motoboy' : selectedCorreiosService)}</p>
+          <p className="mt-3 text-[11px] text-slate-500">{getSlaLabel(activeSub === 'motoboy' ? 'Motoboy' : effectiveCorreiosService)}</p>
           <form onSubmit={handleRequestMotoboy} className="mt-4 space-y-3 text-xs">
             {activeSub === 'correios' ? (
               <label className="block font-semibold text-slate-700">Serviço dos Correios *
-                <select required value={selectedCorreiosService} onChange={e=>setSelectedCorreiosService(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal">
+                <select required value={effectiveCorreiosService} onChange={e=>setSelectedCorreiosService(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal">
                   {correiosServices.map(service => <option key={service.serviceName} value={service.serviceName}>{service.serviceName}</option>)}
                 </select>
               </label>
