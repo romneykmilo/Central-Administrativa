@@ -6,7 +6,7 @@ import { useApp } from '@/context/AppContext';
 import { Clock, Save, ToggleLeft, ToggleRight, History, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
-  const { currentUser, serviceWorkflowPolicies, updateServiceWorkflowPolicy, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy,
+  const { currentUser, serviceWorkflowPolicies, updateServiceWorkflowPolicy, addCorreiosService, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy,
     drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams,
     saveDriver, removeDriver, saveVehicle, removeVehicle, saveWaiter, removeWaiter,
     saveMeetingRoom, removeMeetingRoom, saveServiceLocation, removeServiceLocation,
@@ -44,6 +44,8 @@ export const SettingsModule: React.FC = () => {
     if (masterTab === 'equipes') removeCleaningTeam(id);
   };
   const [draftDays, setDraftDays] = useState<Record<string, string>>({});
+  const [newCorreiosService, setNewCorreiosService] = useState('');
+  const [newCorreiosDays, setNewCorreiosDays] = useState('1');
   const canManage = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   if (!canManage) {
@@ -78,70 +80,47 @@ export const SettingsModule: React.FC = () => {
         </div>
       </section>
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div className="border-b px-4 py-3"><h2 className="text-sm font-semibold text-slate-900">Fluxos de atendimento por serviço</h2><p className="mt-1 text-xs text-slate-500">Defina como cada serviço será encaminhado. As alterações valem para novos chamados.</p></div>
-        <div className="overflow-x-auto"><table className="w-full text-left text-xs">
-          <thead><tr className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3">Tipo de atendimento</th></tr></thead>
-          <tbody className="divide-y divide-slate-100">{serviceWorkflowPolicies.map((policy) => <tr key={policy.serviceName}><td className="px-4 py-3 text-slate-500">{policy.category}</td><td className="px-4 py-3 font-medium text-slate-800">{policy.serviceName}</td><td className="px-4 py-3"><select aria-label={`Tipo de atendimento para ${policy.serviceName}`} value={policy.workflowType} onChange={(event) => updateServiceWorkflowPolicy(policy.serviceName, Number(event.target.value) as ServiceWorkflowType)} className="min-w-64 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"><option value={1}>Tipo 1 — Atendimento direto</option><option value={2}>Tipo 2 — Aprovação do gestor</option><option value={3}>Tipo 3 — Aprovação do solicitante</option></select></td></tr>)}</tbody>
-        </table></div>
-      </section>
-
-      <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900">
-        <div className="flex items-center gap-2 font-semibold"><Clock className="h-4 w-4" /> Regra de contagem do SLA</div>
-        <p className="mt-1">Dias úteis, de segunda a sexta-feira, das 08h às 18h, excluindo feriados nacionais e municipais de Belo Horizonte. Cada dia útil equivale a 10 horas de expediente.</p>
-        <p className="mt-2 font-semibold">Alterações valem somente para novos chamados. Chamados já abertos mantêm o prazo registrado na abertura.</p>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
-        <div className="border-b border-slate-100 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-900">Prazos por serviço</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Edite o prazo em dias úteis ou desative serviços temporariamente para novas solicitações.</p>
+        <div className="border-b px-4 py-3">
+          <h2 className="text-sm font-semibold text-slate-900">Cadastro e configuração de serviços</h2>
+          <p className="mt-1 text-xs text-slate-500">Gerencie em uma única tabela o fluxo de atendimento, o prazo e a disponibilidade de cada serviço.</p>
         </div>
+        <form onSubmit={event => { event.preventDefault(); addCorreiosService(newCorreiosService, Number(newCorreiosDays)); setNewCorreiosService(''); setNewCorreiosDays('1'); }} className="grid gap-2 border-b bg-slate-50 p-3 sm:grid-cols-[1fr_140px_auto]">
+          <input required value={newCorreiosService} onChange={event => setNewCorreiosService(event.target.value)} placeholder="Nome do novo serviço dos Correios" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" />
+          <input required type="number" min="1" max="365" value={newCorreiosDays} onChange={event => setNewCorreiosDays(event.target.value)} aria-label="Prazo em dias úteis" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" />
+          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>Adicionar serviço dos Correios</button>
+        </form>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead><tr className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
-              <th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3 text-center">Prazo (dias úteis)</th><th className="px-4 py-3 text-center">Disponibilidade</th><th className="px-4 py-3 text-right">Ação</th>
+              <th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3">Fluxo de atendimento</th><th className="px-4 py-3 text-center">Prazo (dias úteis)</th><th className="px-4 py-3 text-center">Disponibilidade</th><th className="px-4 py-3 text-right">Ação</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100">
-              {serviceSlaPolicies.map((policy) => {
-                const draft = draftDays[policy.serviceName] ?? String(policy.businessDays);
-                const changed = Number(draft) !== policy.businessDays;
+              {serviceWorkflowPolicies.map(policy => {
+                const sla = serviceSlaPolicies.find(item => item.serviceName === policy.serviceName);
+                const draft = draftDays[policy.serviceName] ?? String(sla?.businessDays ?? '');
+                const changed = !!sla && Number(draft) !== sla.businessDays;
                 return (
                   <tr key={policy.serviceName} className="hover:bg-slate-50/70">
                     <td className="px-4 py-3 text-slate-500">{policy.category}</td>
                     <td className="px-4 py-3 font-medium text-slate-800">{policy.serviceName}</td>
-                    <td className="px-4 py-3 text-center">
-                      <input
-                        aria-label={`Prazo em dias úteis para ${policy.serviceName}`}
-                        type="number" min="1" max="365" step="1"
-                        value={draft}
-                        onChange={(event) => setDraftDays((prev) => ({ ...prev, [policy.serviceName]: event.target.value }))}
-                        className="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-center text-xs text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
+                    <td className="px-4 py-3">
+                      <select aria-label={`Tipo de atendimento para ${policy.serviceName}`} value={policy.workflowType} onChange={event => updateServiceWorkflowPolicy(policy.serviceName, Number(event.target.value) as ServiceWorkflowType)} className="min-w-56 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700">
+                        <option value={1}>Tipo 1 — Atendimento direto</option><option value={2}>Tipo 2 — Aprovação do gestor</option><option value={3}>Tipo 3 — Aprovação do solicitante</option>
+                      </select>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${policy.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{policy.active ? 'Ativo' : 'Inativo'}</span>
+                      {sla ? <input aria-label={`Prazo em dias úteis para ${policy.serviceName}`} type="number" min="1" max="365" step="1" value={draft} onChange={event => setDraftDays(prev => ({ ...prev, [policy.serviceName]: event.target.value }))} className="w-20 rounded-md border border-slate-300 px-2 py-1.5 text-center text-xs text-slate-800" /> : <span className="text-slate-400">Não definido</span>}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {sla ? <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${sla.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{sla.active ? 'Ativo' : 'Inativo'}</span> : <span className="text-slate-400">—</span>}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => updateServiceSlaPolicy(policy.serviceName, { active: !policy.active })}
-                          className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
-                          title={policy.active ? 'Desativar serviço' : 'Ativar serviço'}
-                        >
-                          {policy.active ? <ToggleRight className="h-4 w-4 text-emerald-600" /> : <ToggleLeft className="h-4 w-4" />}
-                          {policy.active ? 'Desativar' : 'Ativar'}
+                      {sla && <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => updateServiceSlaPolicy(policy.serviceName, { active: !sla.active })} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50" title={sla.active ? 'Desativar serviço' : 'Ativar serviço'}>
+                          {sla.active ? <ToggleRight className="h-4 w-4 text-emerald-600" /> : <ToggleLeft className="h-4 w-4" />}{sla.active ? 'Desativar' : 'Ativar'}
                         </button>
-                        <button
-                          disabled={!changed || !Number.isInteger(Number(draft)) || Number(draft) < 1 || Number(draft) > 365}
-                          onClick={() => {
-                            updateServiceSlaPolicy(policy.serviceName, { businessDays: Number(draft) });
-                            setDraftDays((prev) => ({ ...prev, [policy.serviceName]: String(Number(draft)) }));
-                          }}
-                          className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
-                        >
-                          <Save className="h-3 w-3" /> Salvar
-                        </button>
-                      </div>
+                        <button disabled={!changed || !Number.isInteger(Number(draft)) || Number(draft) < 1 || Number(draft) > 365} onClick={() => { updateServiceSlaPolicy(policy.serviceName, { businessDays: Number(draft) }); setDraftDays(prev => ({ ...prev, [policy.serviceName]: String(Number(draft)) })); }} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"><Save className="h-3 w-3"/>Salvar</button>
+                      </div>}
                     </td>
                   </tr>
                 );
@@ -149,6 +128,12 @@ export const SettingsModule: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900">
+        <div className="flex items-center gap-2 font-semibold"><Clock className="h-4 w-4" /> Regra de contagem do SLA</div>
+        <p className="mt-1">Dias úteis, de segunda a sexta-feira, das 08h às 18h, excluindo feriados nacionais e municipais de Belo Horizonte. Cada dia útil equivale a 10 horas de expediente.</p>
+        <p className="mt-2 font-semibold">Alterações valem somente para novos chamados. Chamados já abertos mantêm o prazo registrado na abertura.</p>
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
