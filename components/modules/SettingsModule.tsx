@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ServiceWorkflowType } from '@/types';
+import type { ServiceWorkflowType } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { Clock, Save, ToggleLeft, ToggleRight, History, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
