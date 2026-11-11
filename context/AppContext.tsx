@@ -179,7 +179,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = getStoredData();
     const saved = stored?.serviceSlaPolicies as ServiceSlaPolicy[] | undefined;
     const legacy = saved?.find(policy => policy.serviceName === 'Correios & Motoboy');
-    const base = (saved || SERVICE_SLA_POLICIES.map(policy => ({ ...policy, active: true }))).filter(policy => policy.serviceName !== 'Correios & Motoboy');
+    const retiredMaintenanceServices = ["Climatização e Ar-Condicionado","Instalações Elétricas","Hidráulica Predial","Reparo Civil","Manutenção de Mobiliário","Manutenção Preventiva","Mudança de Layout"];
+    const base = (saved || SERVICE_SLA_POLICIES.map(policy => ({ ...policy, active: true })))
+      .filter(policy => policy.serviceName !== 'Correios & Motoboy' && !retiredMaintenanceServices.includes(policy.serviceName));
+    const normalized = base.map(policy => ({
+      ...policy,
+      category: policy.category === 'Logística e Frotas' ? 'Logística e Transporte' :
+        policy.category === 'Atendimento (Limpeza, copa e portaria)' ? 'Atendimento' : policy.category,
+    }));
     return SERVICE_SLA_POLICIES.reduce((items, defaultPolicy) => {
       if (!items.some(policy => policy.serviceName === defaultPolicy.serviceName)) {
         const isCorreiosLegacy = defaultPolicy.serviceName === 'Correios' || defaultPolicy.serviceName === 'Motoboy';
@@ -190,12 +197,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
       return items;
-    }, base);
+    }, normalized);
   });
   const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => {
     const saved = getStoredData()?.serviceWorkflowPolicies as ServiceWorkflowPolicy[] | undefined;
-    const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy');
-    const normalized = base.map(policy => ['Correios', 'Motoboy'].includes(policy.serviceName) ? { ...policy, category: 'Correios' } : policy);
+    const retiredMaintenanceServices = ["Climatização e Ar-Condicionado","Instalações Elétricas","Hidráulica Predial","Reparo Civil","Manutenção de Mobiliário","Manutenção Preventiva","Mudança de Layout"];
+    const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy' && !retiredMaintenanceServices.includes(policy.serviceName));
+    const normalized = base.map(policy => ({
+      ...policy,
+      category: ['Correios', 'Motoboy'].includes(policy.serviceName) ? 'Correios' :
+        policy.category === 'Logística e Frotas' ? 'Logística e Transporte' :
+        policy.category === 'Atendimento (Limpeza, copa e portaria)' ? 'Atendimento' : policy.category,
+    }));
     return [...normalized, ...SERVICE_WORKFLOW_POLICIES.filter(policy => !normalized.some(item => item.serviceName === policy.serviceName))];
   });
   const [serviceSlaHistory, setServiceSlaHistory] = useState<ServiceSlaChange[]>(() => getStoredData()?.serviceSlaHistory || []);
