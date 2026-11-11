@@ -180,10 +180,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const saved = stored?.serviceSlaPolicies as ServiceSlaPolicy[] | undefined;
     const legacy = saved?.find(policy => policy.serviceName === 'Correios & Motoboy');
     const base = (saved || SERVICE_SLA_POLICIES.map(policy => ({ ...policy, active: true }))).filter(policy => policy.serviceName !== 'Correios & Motoboy');
-    return (['Correios', 'Motoboy'] as const).reduce((items, serviceName) => {
-      if (!items.some(policy => policy.serviceName === serviceName)) {
-        const defaults = SERVICE_SLA_POLICIES.find(policy => policy.serviceName === serviceName);
-        if (defaults) items.push({ ...defaults, businessDays: legacy?.businessDays ?? defaults.businessDays, active: legacy?.active ?? true });
+    return SERVICE_SLA_POLICIES.reduce((items, defaultPolicy) => {
+      if (!items.some(policy => policy.serviceName === defaultPolicy.serviceName)) {
+        const isCorreiosLegacy = defaultPolicy.serviceName === 'Correios' || defaultPolicy.serviceName === 'Motoboy';
+        items.push({
+          ...defaultPolicy,
+          businessDays: isCorreiosLegacy ? (legacy?.businessDays ?? defaultPolicy.businessDays) : defaultPolicy.businessDays,
+          active: isCorreiosLegacy ? (legacy?.active ?? true) : true,
+        });
       }
       return items;
     }, base);
@@ -191,7 +195,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => {
     const saved = getStoredData()?.serviceWorkflowPolicies as ServiceWorkflowPolicy[] | undefined;
     const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy');
-    return base.map(policy => ['Correios', 'Motoboy'].includes(policy.serviceName) ? { ...policy, category: 'Correios' } : policy);
+    const normalized = base.map(policy => ['Correios', 'Motoboy'].includes(policy.serviceName) ? { ...policy, category: 'Correios' } : policy);
+    return [...normalized, ...SERVICE_WORKFLOW_POLICIES.filter(policy => !normalized.some(item => item.serviceName === policy.serviceName))];
   });
   const [serviceSlaHistory, setServiceSlaHistory] = useState<ServiceSlaChange[]>(() => getStoredData()?.serviceSlaHistory || []);
 
