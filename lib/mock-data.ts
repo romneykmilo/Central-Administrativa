@@ -944,9 +944,8 @@ export const MOCK_NOTIFICATIONS: NotificationItem[] = [
 export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', workflowType: 2 },
   { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', workflowType: 3 },
-  { category: 'Logística e Frotas', serviceName: 'Correios & Motoboy', workflowType: 1 },
-  { category: 'Logística e Frotas', serviceName: 'Correios', workflowType: 1 },
-  { category: 'Logística e Frotas', serviceName: 'Motoboy', workflowType: 1 },
+  { category: 'Correios', serviceName: 'Correios', workflowType: 1 },
+  { category: 'Correios', serviceName: 'Motoboy', workflowType: 1 },
   { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', workflowType: 2 },
   { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', workflowType: 1 },
   { category: 'Atendimento', serviceName: 'Limpeza & Higienização', workflowType: 2 },
@@ -977,7 +976,8 @@ export const SERVICE_WORKFLOW_POLICIES = [
 export const SERVICE_SLA_POLICIES = [
   { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', businessDays: 2 },
   { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', businessDays: 4 },
-  { category: 'Logística e Frotas', serviceName: 'Correios & Motoboy', businessDays: 1 },
+  { category: 'Correios', serviceName: 'Correios', businessDays: 1 },
+  { category: 'Correios', serviceName: 'Motoboy', businessDays: 1 },
   { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', businessDays: 4 },
   { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', businessDays: 2 },
   { category: 'Atendimento (Limpeza, copa e portaria)', serviceName: 'Limpeza & Higienização', businessDays: 2 },
