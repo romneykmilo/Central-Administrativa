@@ -18,6 +18,7 @@ export type TicketStatus =
   | 'em_analise'
   | 'aguardando_info'
   | 'aguardando_aprovacao'
+  | 'aguardando_aprovacao_solicitante'
   | 'agendado'
   | 'em_andamento'
   | 'concluido'
@@ -57,6 +58,14 @@ export interface TicketHistoryEntry {
   details?: string;
 }
 
+export type ServiceWorkflowType = 1 | 2 | 3;
+
+export interface ServiceWorkflowPolicy {
+  category: string;
+  serviceName: string;
+  workflowType: ServiceWorkflowType;
+}
+
 export interface Ticket {
   id: string;
   ticketNumber: string; // e.g. #ADM-1024
@@ -64,6 +73,7 @@ export interface Ticket {
   description: string;
   category: ServiceCategory;
   serviceName: string;
+  workflowType?: ServiceWorkflowType;
   priority: TicketPriority;
   status: TicketStatus;
   requesterId: string;
