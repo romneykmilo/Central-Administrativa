@@ -20,7 +20,7 @@ interface FormContentProps {
 }
 
 const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onClose }) => {
-  const { createTicket, currentUser, serviceSlaPolicies } = useApp();
+  const { createTicket, currentUser, serviceSlaPolicies, serviceWorkflowPolicies } = useApp();
 
   const [category, setCategory] = useState<ServiceCategory>(initialPrefill?.category || 'manutencao');
   const [serviceName, setServiceName] = useState<string>(
@@ -50,7 +50,7 @@ const NewTicketFormContent: React.FC<FormContentProps> = ({ initialPrefill, onCl
     setAttachedFiles((prev) => [...prev, mockFile]);
   };
 
-  const configuredCorreiosServices = serviceSlaPolicies.filter(policy => policy.active && policy.category === 'Correios').map(policy => policy.serviceName).filter(name => name !== 'Motoboy');
+  const configuredCorreiosServices = serviceWorkflowPolicies.filter(workflow => workflow.category === 'Correios' && workflow.serviceName !== 'Motoboy' && serviceSlaPolicies.some(policy => policy.serviceName === workflow.serviceName && policy.active)).map(workflow => workflow.serviceName);
   const categoryServices = category === 'logistica' ? [...(servicesByCategory.logistica || []).filter(name => !['Correios', 'Correios & Motoboy'].includes(name)), ...configuredCorreiosServices, 'Motoboy'] : (servicesByCategory[category] || []);
   const activeServices = categoryServices.filter((name) => serviceSlaPolicies.some((policy) => policy.serviceName === name && policy.active));
   const slaDays = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active)?.businessDays;
