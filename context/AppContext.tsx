@@ -27,6 +27,7 @@ import {
   CleaningTeam,
   ServiceWorkflowPolicy,
   ServiceWorkflowType,
+  TicketOperationalStatus,
 } from '@/types';
 import { addBusinessSlaDeadline } from '@/lib/mock-data';
 import {
@@ -76,6 +77,7 @@ interface AppContextType {
   setSelectedTicketId: (id: string | null) => void;
   createTicket: (data: Partial<Ticket>) => Ticket;
   updateTicketStatus: (ticketId: string, status: TicketStatus, note?: string) => void;
+  updateTicketOperationalStatus: (ticketId: string, status: TicketOperationalStatus, note?: string) => void;
   addTicketComment: (ticketId: string, content: string, isInternal?: boolean) => void;
   assignTicket: (ticketId: string, assignedToId: string, assignedToName: string) => void;
 
@@ -330,7 +332,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const nowIso = new Date().toISOString();
     setTickets((prev) => prev.map((ticket) => {
       if (ticket.id !== ticketId || (ticket.workflowType || 1) !== 2 || ticket.status !== 'aguardando_aprovacao') return ticket;
-      return { ...ticket, status: 'concluido', completedAt: nowIso, history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Solicitação aprovada pelo gestor e concluída', performedBy: currentUser.name }] };
+      return { ...ticket, status: 'concluido', operationalStatus: 'concluido', completedAt: nowIso, history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Solicitação aprovada pelo gestor e concluída', performedBy: currentUser.name }] };
     }));
     showToast('Solicitação aprovada e concluída.');
   };
@@ -340,7 +342,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const nowIso = new Date().toISOString();
     setTickets((prev) => prev.map((ticket) => {
       if (ticket.id !== ticketId || (ticket.workflowType || 1) !== 3 || !['em_analise', 'em_andamento'].includes(ticket.status)) return ticket;
-      return { ...ticket, status: 'aguardando_aprovacao_solicitante', history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Atendimento encaminhado ao solicitante para aprovação', performedBy: currentUser.name }] };
+      return { ...ticket, status: 'aguardando_aprovacao_solicitante', operationalStatus: 'aguardando_aprovacao_solicitante', history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Atendimento encaminhado ao solicitante para aprovação', performedBy: currentUser.name }] };
     }));
     showToast('Resultado encaminhado ao solicitante para aprovação.');
   };
@@ -355,6 +357,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTickets((prev) => prev.map((item) => item.id !== ticketId ? item : {
       ...item,
       status: approved ? 'concluido' : 'em_analise',
+      operationalStatus: approved ? 'concluido' : 'em_analise',
       completedAt: approved ? nowIso : undefined,
       comments: note.trim() ? [...item.comments, { id: `c-${Date.now()}`, authorId: currentUser.id, authorName: currentUser.name, authorRole: currentUser.roleLabel, content: note.trim(), createdAt: nowIso, isInternal: false }] : item.comments,
       history: [...item.history, { id: `h-${Date.now()}`, timestamp: nowIso, action, performedBy: currentUser.name, details: note.trim() || undefined }],
@@ -385,6 +388,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       workflowType,
       priority,
       status: initialStatus,
+      operationalStatus: workflowType === 2 ? 'aguardando_aprovacao_gestor' : workflowType === 3 ? 'em_analise' : 'novo',
       requesterId: currentUser.id,
       requesterName: currentUser.name,
       requesterDepartment: currentUser.department,
@@ -429,29 +433,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateTicketStatus = (ticketId: string, status: TicketStatus, note?: string) => {
     const target = tickets.find((ticket) => ticket.id === ticketId);
     if (target && (target.workflowType || 1) !== 1) { showToast('Este chamado deve seguir as etapas de aprovação definidas para seu serviço.'); return; }
+    const operationalStatus: TicketOperationalStatus =
+      status === 'em_andamento' ? 'em_atendimento' :
+      status === 'aguardando_info' ? 'aguardando_informacoes' : status;
+    updateTicketOperationalStatus(ticketId, operationalStatus, note);
+  };
+
+  const updateTicketOperationalStatus = (ticketId: string, status: TicketOperationalStatus, note?: string) => {
+    if (!['admin', 'manager', 'attendant'].includes(currentUser.role)) {
+      showToast('Apenas a equipe responsável pode atualizar o status operacional.');
+      return;
+    }
+    const target = tickets.find((ticket) => ticket.id === ticketId);
+    if (!target) return;
+    if ((target.workflowType || 1) !== 1 && ['concluido', 'cancelado'].includes(status)) {
+      showToast('A conclusão deste chamado depende da etapa de aprovação prevista no fluxo.');
+      return;
+    }
+    if (['aguardando_aprovacao_gestor', 'aguardando_aprovacao_solicitante'].includes(status)) {
+      showToast('As etapas de aprovação são atualizadas pelas ações específicas do fluxo.');
+      return;
+    }
+    const legacyStatus: TicketStatus =
+      status === 'em_atendimento' ? 'em_andamento' :
+      status === 'aguardando_informacoes' ? 'aguardando_info' :
+      status === 'aguardando_fornecedor' ? 'em_analise' :
+      status === 'novo' || status === 'em_analise' || status === 'agendado' || status === 'concluido' || status === 'cancelado'
+        ? status
+        : 'em_analise';
     const nowIso = new Date().toISOString();
-    setTickets((prev) =>
-      prev.map((t) => {
-        if (t.id !== ticketId) return t;
-        const newHistory = [
-          ...t.history,
-          {
-            id: `h-${Date.now()}`,
-            timestamp: nowIso,
-            action: `Status alterado para "${status.replace('_', ' ').toUpperCase()}"`,
-            performedBy: currentUser.name,
-            details: note,
-          },
-        ];
-        return {
-          ...t,
-          status,
-          completedAt: status === 'concluido' ? nowIso : t.completedAt,
-          history: newHistory,
-        };
-      })
-    );
-    showToast(`Status do chamado atualizado.`);
+    setTickets((prev) => prev.map((ticket) => ticket.id !== ticketId ? ticket : ({
+      ...ticket,
+      operationalStatus: status,
+      ...((ticket.workflowType || 1) === 1 ? { status: legacyStatus } : {}),
+      completedAt: status === 'concluido' ? nowIso : ticket.completedAt,
+      history: [...ticket.history, {
+        id: `h-${Date.now()}`,
+        timestamp: nowIso,
+        action: `Status operacional alterado para "${status.replace(/_/g, ' ').toUpperCase()}"`,
+        performedBy: currentUser.name,
+        details: note,
+      }],
+    })));
+    showToast('Status operacional atualizado.');
   };
 
   const addTicketComment = (ticketId: string, content: string, isInternal: boolean = false) => {
@@ -486,6 +510,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           assignedToId,
           assignedToName,
           status: t.status === 'novo' ? 'em_analise' : t.status,
+          operationalStatus: !t.operationalStatus || t.operationalStatus === 'novo' ? 'em_analise' : t.operationalStatus,
           history: [
             ...t.history,
             {
@@ -660,6 +685,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSelectedTicketId,
         createTicket,
         updateTicketStatus,
+        updateTicketOperationalStatus,
         addTicketComment,
         assignTicket,
         schedules,
