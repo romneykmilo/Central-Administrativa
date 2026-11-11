@@ -5,7 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
 import { Truck, Car, Package, Send, Boxes, Mail } from 'lucide-react';
 
-type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'cargas' | 'malote';
+type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'motoboy' | 'cargas' | 'malote';
 
 export const LogisticsModule: React.FC = () => {
   const { vehicles, openNewTicketWithPrefill, serviceSlaPolicies } = useApp();
@@ -14,6 +14,8 @@ export const LogisticsModule: React.FC = () => {
   const [destination, setDestination] = useState('');
   const [recipient, setRecipient] = useState('');
   const [deliveryType, setDeliveryType] = useState('Motoboy dedicado');
+  const [selectedCorreiosService, setSelectedCorreiosService] = useState('Correios');
+  const correiosServices = serviceSlaPolicies.filter(policy => policy.category === 'Correios' && policy.active);
   const [notes, setNotes] = useState('');
 
   const getSlaLabel = (serviceName: string) => { const policy = serviceSlaPolicies.find(item => item.serviceName === serviceName && item.active); return policy ? `Prazo de atendimento: ${policy.businessDays} ${policy.businessDays === 1 ? 'dia útil' : 'dias úteis'}.` : 'Prazo de atendimento não cadastrado no momento.'; };
@@ -35,7 +37,7 @@ export const LogisticsModule: React.FC = () => {
       title: `Envio / coleta: ${destination}`,
       description: `Tipo de envio: ${deliveryType}\nOrigem: ${origin}\nDestino: ${destination}\nDestinatário / contato: ${recipient || 'Não informado'}\nOrientações: ${notes || 'Não informado'}`,
       category: 'logistica',
-      serviceName: 'Correios & Motoboy',
+      serviceName: activeSub === 'motoboy' ? 'Motoboy' : selectedCorreiosService,
       priority: 'media',
       location: destination,
     });
@@ -44,7 +46,8 @@ export const LogisticsModule: React.FC = () => {
   const tabs = [
     { id: 'motorista' as const, label: 'Agendamento de Motorista', icon: Truck },
     { id: 'locacao' as const, label: 'Locação de Veículos', icon: Car },
-    { id: 'correios' as const, label: 'Correios & Motoboy', icon: Package },
+    { id: 'correios' as const, label: 'Correios', icon: Package },
+    { id: 'motoboy' as const, label: 'Motoboy', icon: Send },
     { id: 'cargas' as const, label: 'Transporte de Cargas', icon: Boxes },
     { id: 'malote' as const, label: 'Malote Corporativo', icon: Mail },
   ];
@@ -105,18 +108,29 @@ export const LogisticsModule: React.FC = () => {
         </div>
       )}
 
-      {activeSub === 'correios' && (
+      {(activeSub === 'correios' || activeSub === 'motoboy') && (
         <div className="max-w-2xl rounded-xl border border-slate-200 bg-white p-5">
-          <div className="flex items-start gap-3"><Package className="mt-0.5 h-5 w-5 text-blue-600" /><div><h2 className="text-sm font-semibold text-slate-900">Solicitar coleta ou envio</h2><p className="mt-1 text-xs text-slate-500">Para correspondências, documentos, encomendas e entregas externas.</p></div></div>
+          <div className="flex items-start gap-3">{activeSub === 'correios' ? <Package className="mt-0.5 h-5 w-5 text-blue-600" /> : <Send className="mt-0.5 h-5 w-5 text-blue-600" />}<div><h2 className="text-sm font-semibold text-slate-900">{activeSub === 'correios' ? 'Solicitar serviço dos Correios' : 'Solicitar serviço de motoboy'}</h2><p className="mt-1 text-xs text-slate-500">{activeSub === 'correios' ? 'Para correspondências, documentos e encomendas encaminhadas pelos serviços dos Correios.' : 'Para coleta e entrega rápida de documentos, encomendas e materiais por motoboy.'}</p></div></div>
+          <p className="mt-3 text-[11px] text-slate-500">{getSlaLabel(activeSub === 'motoboy' ? 'Motoboy' : selectedCorreiosService)}</p>
           <form onSubmit={handleRequestMotoboy} className="mt-4 space-y-3 text-xs">
-            <label className="block font-semibold text-slate-700">Tipo de envio *<select required value={deliveryType} onChange={e=>setDeliveryType(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal"><option>Motoboy dedicado</option><option>Correios - SEDEX</option><option>Correios - PAC</option><option>Malote fixo</option></select></label>
+            {activeSub === 'correios' ? (
+              <label className="block font-semibold text-slate-700">Serviço dos Correios *
+                <select required value={selectedCorreiosService} onChange={e=>setSelectedCorreiosService(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal">
+                  {correiosServices.map(service => <option key={service.serviceName} value={service.serviceName}>{service.serviceName}</option>)}
+                </select>
+              </label>
+            ) : (
+              <label className="block font-semibold text-slate-700">Modalidade *
+                <select required value={deliveryType} onChange={e=>setDeliveryType(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 font-normal"><option>Motoboy dedicado</option><option>Coleta programada</option><option>Entrega expressa</option></select>
+              </label>
+            )}
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="font-semibold text-slate-700">Local de coleta *<input required value={origin} onChange={e=>setOrigin(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
               <label className="font-semibold text-slate-700">Endereço de entrega *<input required value={destination} onChange={e=>setDestination(e.target.value)} placeholder="Endereço completo" className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
             </div>
             <label className="block font-semibold text-slate-700">Destinatário / contato<input value={recipient} onChange={e=>setRecipient(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
             <label className="block font-semibold text-slate-700">Orientações e observações<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Descreva o conteúdo, prazo, necessidade de protocolo ou assinatura." className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 font-normal"/></label>
-            <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700"><Send className="h-4 w-4"/> Enviar solicitação</button>
+            <button type="submit" disabled={activeSub === 'correios' && correiosServices.length === 0} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"><Send className="h-4 w-4"/> Enviar solicitação</button>
           </form>
         </div>
       )}
