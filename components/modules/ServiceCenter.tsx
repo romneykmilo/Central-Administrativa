@@ -91,7 +91,8 @@ export const ServiceCenter: React.FC = () => {
       }
 
       // Status filter
-      if (filterStatus !== 'todos' && ticket.status !== filterStatus) {
+      const operational = ticket.operationalStatus || (ticket.status === 'em_andamento' ? 'em_atendimento' : ticket.status === 'aguardando_info' ? 'aguardando_informacoes' : ticket.status === 'aguardando_aprovacao' ? 'aguardando_aprovacao_gestor' : ticket.status);
+      if (filterStatus !== 'todos' && operational !== filterStatus) {
         return false;
       }
 
@@ -242,12 +243,13 @@ export const ServiceCenter: React.FC = () => {
             >
               <option value="todos">Todos os Status</option>
               <option value="novo">Novo</option>
-              <option value="em_analise">Em Análise</option>
-              <option value="aguardando_info">Aguardando Informação</option>
-              <option value="aguardando_aprovacao">Aguardando Aprovação</option>
-              <option value="aguardando_aprovacao_solicitante">Aguardando Aprovação do Solicitante</option>
+              <option value="em_analise">Em análise</option>
+              <option value="em_atendimento">Em atendimento</option>
+              <option value="aguardando_fornecedor">Aguardando fornecedor</option>
               <option value="agendado">Agendado</option>
-              <option value="em_andamento">Em Andamento</option>
+              <option value="aguardando_aprovacao_gestor">Aguardando aprovação do gestor</option>
+              <option value="aguardando_aprovacao_solicitante">Aguardando aprovação do solicitante</option>
+              <option value="aguardando_informacoes">Aguardando informações</option>
               <option value="concluido">Concluído</option>
               <option value="cancelado">Cancelado</option>
             </select>
@@ -360,8 +362,8 @@ export const ServiceCenter: React.FC = () => {
 
                       {/* Status */}
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">
-                          {t.status.replace('_', ' ')}
+                        <span className="text-[10px] font-semibold px-2 py-1 rounded bg-blue-50 text-blue-800">
+                          {({ novo: 'Novo', em_analise: 'Em análise', em_atendimento: 'Em atendimento', aguardando_fornecedor: 'Aguardando fornecedor', agendado: 'Agendado', aguardando_aprovacao_gestor: 'Aguardando aprovação do gestor', aguardando_aprovacao_solicitante: 'Aguardando aprovação do solicitante', aguardando_informacoes: 'Aguardando informações', concluido: 'Concluído', cancelado: 'Cancelado' } as Record<string, string>)[t.operationalStatus || (t.status === 'em_andamento' ? 'em_atendimento' : t.status === 'aguardando_info' ? 'aguardando_informacoes' : t.status === 'aguardando_aprovacao' ? 'aguardando_aprovacao_gestor' : t.status)] || 'Em análise'}
                         </span>
                       </td>
 
