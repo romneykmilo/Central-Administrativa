@@ -50,8 +50,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpenMobile, setIsOpenMobile 
     {
       label: 'Serviços',
       items: [
-        { id: 'logistica', label: 'Logística & Frotas', icon: Truck },
-        { id: 'atendimento', label: 'Atendimento (Limpeza, copa e portaria)', icon: Users },
+        { id: 'logistica', label: 'Logística e Transporte', icon: Truck },
+        { id: 'atendimento', label: 'Atendimento', icon: Users },
         { id: 'manutencao', label: 'Manutenção Predial', icon: Wrench },
         { id: 'viagens', label: 'Viagens & Passagens', icon: Plane },
         { id: 'telefonia', label: 'Telefonia & Celular', icon: PhoneCall },
