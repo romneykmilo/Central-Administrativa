@@ -70,7 +70,7 @@ export const ServiceCenter: React.FC = () => {
       if (activeView === 'meus' && ticket.requesterId !== currentUser.id) {
         return false;
       }
-      if (activeView === 'aprovacoes' && ticket.status !== 'aguardando_aprovacao') {
+      if (activeView === 'aprovacoes' && !['aguardando_aprovacao', 'aguardando_aprovacao_solicitante'].includes(ticket.status)) {
         return false;
       }
 
@@ -179,7 +179,7 @@ export const ServiceCenter: React.FC = () => {
           { id: 'todos', label: `Todos os Chamados (${tickets.length})` },
           { id: 'meus', label: `Meus Chamados (${tickets.filter((t) => t.requesterId === currentUser.id).length})` },
           { id: 'sla_painel', label: 'Painel de SLA' },
-          { id: 'aprovacoes', label: `Aguardando Aprovação (${tickets.filter((t) => t.status === 'aguardando_aprovacao').length})` },
+          { id: 'aprovacoes', label: `Aguardando Aprovação (${tickets.filter((t) => ['aguardando_aprovacao', 'aguardando_aprovacao_solicitante'].includes(t.status)).length})` },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -245,6 +245,7 @@ export const ServiceCenter: React.FC = () => {
               <option value="em_analise">Em Análise</option>
               <option value="aguardando_info">Aguardando Informação</option>
               <option value="aguardando_aprovacao">Aguardando Aprovação</option>
+              <option value="aguardando_aprovacao_solicitante">Aguardando Aprovação do Solicitante</option>
               <option value="agendado">Agendado</option>
               <option value="em_andamento">Em Andamento</option>
               <option value="concluido">Concluído</option>
