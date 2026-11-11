@@ -35,7 +35,7 @@ export const LogisticsModule: React.FC = () => {
     if (!destination.trim()) return;
     openNewTicketWithPrefill({
       title: `Envio / coleta: ${destination}`,
-      description: `Tipo de envio: ${deliveryType}\nOrigem: ${origin}\nDestino: ${destination}\nDestinatário / contato: ${recipient || 'Não informado'}\nOrientações: ${notes || 'Não informado'}`,
+      description: `Tipo de serviço: ${activeSub === 'motoboy' ? deliveryType : selectedCorreiosService}\nOrigem: ${origin}\nDestino: ${destination}\nDestinatário / contato: ${recipient || 'Não informado'}\nOrientações: ${notes || 'Não informado'}`,
       category: 'logistica',
       serviceName: activeSub === 'motoboy' ? 'Motoboy' : selectedCorreiosService,
       priority: 'media',
