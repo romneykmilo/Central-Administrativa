@@ -42,10 +42,10 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
       icon: Users,
     },
     manutencao: {
-      title: 'Manutenção Predial & Climatização',
-      subtitle: 'Ordens de serviço de ar-condicionado (PMOC), elétrica, hidráulica e reparos civis',
+      title: 'Manutenção Predial',
+      subtitle: 'Solicitações de manutenção e conservação predial.',
       category: 'manutencao',
-      defaultService: 'Climatização e Ar-Condicionado',
+      defaultService: 'Manutenção Predial',
       icon: Wrench,
     },
     telefonia: {
