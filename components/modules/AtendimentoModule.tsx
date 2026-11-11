@@ -44,6 +44,7 @@ export const AtendimentoModule: React.FC = () => {
         <p className="mt-1 text-xs sm:text-sm text-slate-500">Limpeza, copa, portaria e serviços externos. Selecione o atendimento para consultar as orientações e fazer sua solicitação.</p>
       </div>
 
+      <div className="pt-1"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Atendimento (Limpeza, copa, portaria)</p></div>
       <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
         {tabs.map(tab => {
           const Icon = tab.icon;
