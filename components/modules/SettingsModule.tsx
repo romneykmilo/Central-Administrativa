@@ -35,7 +35,7 @@ export const SettingsModule: React.FC = () => {
     setDetail(masterTab === 'motoristas' ? item.cnh : masterTab === 'veiculos' ? item.plate : masterTab === 'salas' ? String(item.capacity || '') : masterTab === 'equipes' ? String(item.members || '') : item.description || '');
     setExtra(masterTab === 'motoristas' ? item.phone : masterTab === 'veiculos' ? String(item.year) : item.location || '');
   };
-  const masterItems: any[] = masterTab === 'motoristas' ? drivers : masterTab === 'veiculos' ? vehicles : masterTab === 'garcons' ? waiters : masterTab === 'salas' ? meetingRooms : masterTab === 'locais' ? serviceLocations : masterTab === 'equipes' ? cleaningTeams : serviceSlaPolicies.filter(policy => policy.category === 'Correios');
+  const masterItems: any[] = masterTab === 'motoristas' ? drivers : masterTab === 'veiculos' ? vehicles : masterTab === 'garcons' ? waiters : masterTab === 'salas' ? meetingRooms : masterTab === 'locais' ? serviceLocations : masterTab === 'equipes' ? cleaningTeams : serviceWorkflowPolicies.filter(policy => policy.category === 'Correios').map(policy => ({ ...policy, ...serviceSlaPolicies.find(item => item.serviceName === policy.serviceName) }));
   const deleteMaster = (id: string) => {
     if (masterTab === 'motoristas') removeDriver(id);
     if (masterTab === 'veiculos') removeVehicle(id);
@@ -66,7 +66,7 @@ export const SettingsModule: React.FC = () => {
         </div>
         <form onSubmit={submitMaster} className="grid gap-2 border-b bg-slate-50 p-3 sm:grid-cols-4">
           <input required value={name} onChange={e=>setName(e.target.value)} placeholder={masterTab==='veiculos'?'Modelo do veículo':masterTab==='correios'?'Nome do serviço dos Correios':'Nome'} className="rounded-md border bg-white px-3 py-2 text-sm" />
-          {masterTab!=='garcons' && <input value={detail} onChange={e=>setDetail(e.target.value)} type={masterTab==='correios'?'number':'text'} min={masterTab==='correios'?1:undefined} max={masterTab==='correios'?365:undefined} placeholder={masterTab==='motoristas'?'CNH':masterTab==='veiculos'?'Placa':masterTab==='salas'?'Capacidade':masterTab==='equipes'?'Quantidade de integrantes':masterTab==='correios'?'Prazo em dias úteis':'Descrição'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
+          {masterTab!=='garcons' && <input value={detail} onChange={e=>setDetail(e.target.value)} type={masterTab==='correios'?'number':'text'} required={masterTab==='correios'} min={masterTab==='correios'?1:undefined} max={masterTab==='correios'?365:undefined} placeholder={masterTab==='motoristas'?'CNH':masterTab==='veiculos'?'Placa':masterTab==='salas'?'Capacidade':masterTab==='equipes'?'Quantidade de integrantes':masterTab==='correios'?'Prazo em dias úteis':'Descrição'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
           {(masterTab==='motoristas'||masterTab==='veiculos'||masterTab==='salas') && <input value={extra} onChange={e=>setExtra(e.target.value)} placeholder={masterTab==='motoristas'?'Telefone':masterTab==='veiculos'?'Ano':'Localização'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
           <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>{editingId?'Salvar alterações':masterTab==='correios'?'Adicionar serviço':'Adicionar cadastro'}</button>
           {editingId && <button type="button" onClick={resetMasterForm} className="text-xs text-slate-500">Cancelar edição</button>}
