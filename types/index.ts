@@ -60,6 +60,18 @@ export interface TicketHistoryEntry {
 
 export type ServiceWorkflowType = 1 | 2 | 3;
 
+export type TicketOperationalStatus =
+  | 'novo'
+  | 'em_analise'
+  | 'em_atendimento'
+  | 'aguardando_fornecedor'
+  | 'agendado'
+  | 'aguardando_aprovacao_gestor'
+  | 'aguardando_aprovacao_solicitante'
+  | 'aguardando_informacoes'
+  | 'concluido'
+  | 'cancelado';
+
 export interface ServiceWorkflowPolicy {
   category: string;
   serviceName: string;
@@ -74,6 +86,7 @@ export interface Ticket {
   category: ServiceCategory;
   serviceName: string;
   workflowType?: ServiceWorkflowType;
+  operationalStatus?: TicketOperationalStatus;
   priority: TicketPriority;
   status: TicketStatus;
   requesterId: string;
