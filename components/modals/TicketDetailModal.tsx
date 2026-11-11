@@ -28,11 +28,15 @@ export const TicketDetailModal: React.FC = () => {
     updateTicketStatus,
     addTicketComment,
     assignTicket,
+    approveManagerWorkflow,
+    submitTicketForRequesterApproval,
+    respondToRequesterApproval,
     currentUser,
     availableUsers,
   } = useApp();
 
   const [commentText, setCommentText] = useState('');
+  const [approvalNote, setApprovalNote] = useState('');
   const [isInternalComment, setIsInternalComment] = useState(false);
   const [nowTimestamp] = useState(() => Date.now());
 
@@ -85,7 +89,8 @@ export const TicketDetailModal: React.FC = () => {
     { id: 'novo', label: 'Novo', color: 'bg-slate-100 text-slate-800' },
     { id: 'em_analise', label: 'Em Análise', color: 'bg-blue-100 text-blue-800' },
     { id: 'aguardando_info', label: 'Aguardando Informação', color: 'bg-amber-100 text-amber-800' },
-    { id: 'aguardando_aprovacao', label: 'Aguardando Aprovação', color: 'bg-purple-100 text-purple-800' },
+    { id: 'aguardando_aprovacao', label: 'Aguardando Aprovação do Gestor', color: 'bg-purple-100 text-purple-800' },
+    { id: 'aguardando_aprovacao_solicitante', label: 'Aguardando Aprovação do Solicitante', color: 'bg-fuchsia-100 text-fuchsia-800' },
     { id: 'agendado', label: 'Agendado', color: 'bg-cyan-100 text-cyan-800' },
     { id: 'em_andamento', label: 'Em Andamento', color: 'bg-indigo-100 text-indigo-800' },
     { id: 'concluido', label: 'Concluído', color: 'bg-emerald-100 text-emerald-800' },
@@ -271,30 +276,40 @@ export const TicketDetailModal: React.FC = () => {
 
           {/* Right Column: Metadata & Controls (1 span) */}
           <div className="p-6 bg-slate-50/50 space-y-6">
-            {/* Status change selector */}
+            {/* Etapas do fluxo configurado para o serviço */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                Alterar Status do Chamado
-              </label>
-              <div className="space-y-1">
-                {statusOptions.map((st) => {
-                  const isCurrent = selectedTicket.status === st.id;
-                  return (
-                    <button
-                      key={st.id}
-                      onClick={() => handleStatusChange(st.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border text-left transition-colors ${
-                        isCurrent
-                          ? 'bg-slate-900 text-white border-slate-900 shadow-2xs font-semibold'
-                          : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
-                      }`}
-                    >
-                      <span>{st.label}</span>
-                      {isCurrent && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                    </button>
-                  );
-                })}
-              </div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Fluxo do atendimento · Tipo {selectedTicket.workflowType || 1}</label>
+              {(selectedTicket.workflowType || 1) === 1 && (
+                <div className="space-y-1">
+                  {statusOptions.filter((st) => !['aguardando_aprovacao', 'aguardando_aprovacao_solicitante'].includes(st.id)).map((st) => {
+                    const isCurrent = selectedTicket.status === st.id;
+                    return <button key={st.id} onClick={() => handleStatusChange(st.id)} className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border text-left transition-colors ${isCurrent ? 'bg-slate-900 text-white border-slate-900' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'}`}><span>{st.label}</span>{isCurrent && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}</button>;
+                  })}
+                </div>
+              )}
+              {(selectedTicket.workflowType || 1) === 2 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-600">Solicitação → Aprovação do gestor → Conclusão.</p>
+                  {selectedTicket.status === 'aguardando_aprovacao' && (currentUser.role === 'admin' || currentUser.role === 'manager') && <button onClick={() => approveManagerWorkflow(selectedTicket.id)} className="w-full rounded-lg bg-emerald-600 px-3 py-2.5 text-xs font-semibold text-white">Aprovar solicitação e concluir</button>}
+                  {selectedTicket.status === 'aguardando_aprovacao' && currentUser.role !== 'admin' && currentUser.role !== 'manager' && <p className="rounded-lg bg-purple-50 p-3 text-xs text-purple-800">Aguardando aprovação de um gestor.</p>}
+                  {selectedTicket.status === 'concluido' && <p className="rounded-lg bg-emerald-50 p-3 text-xs text-emerald-800">Solicitação aprovada e concluída.</p>}
+                </div>
+              )}
+              {(selectedTicket.workflowType || 1) === 3 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-600">Solicitação → Atendimento/análise → Aprovação do solicitante → Conclusão. Se houver ajustes, retorna para nova análise.</p>
+                  {['admin', 'manager', 'attendant'].includes(currentUser.role) && ['em_analise', 'em_andamento'].includes(selectedTicket.status) && <button onClick={() => submitTicketForRequesterApproval(selectedTicket.id)} className="w-full rounded-lg bg-blue-600 px-3 py-2.5 text-xs font-semibold text-white">Encaminhar resultado para aprovação</button>}
+                  {selectedTicket.status === 'aguardando_aprovacao_solicitante' && selectedTicket.requesterId === currentUser.id && (
+                    <div className="space-y-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 p-3">
+                      <p className="text-xs font-semibold text-fuchsia-900">O resultado está aguardando sua avaliação.</p>
+                      <textarea value={approvalNote} onChange={(event) => setApprovalNote(event.target.value)} rows={3} placeholder="Se precisar de ajustes, descreva o que deve ser revisto." className="w-full rounded-md border border-fuchsia-200 bg-white p-2 text-xs text-slate-800" />
+                      <button onClick={() => respondToRequesterApproval(selectedTicket.id, true, approvalNote)} className="w-full rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white">Aprovar e concluir</button>
+                      <button onClick={() => respondToRequesterApproval(selectedTicket.id, false, approvalNote)} disabled={!approvalNote.trim()} className="w-full rounded-md border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-800 disabled:opacity-50">Solicitar nova análise</button>
+                    </div>
+                  )}
+                  {selectedTicket.status === 'aguardando_aprovacao_solicitante' && selectedTicket.requesterId !== currentUser.id && <p className="rounded-lg bg-fuchsia-50 p-3 text-xs text-fuchsia-800">Aguardando avaliação do solicitante.</p>}
+                </div>
+              )}
             </div>
 
             {/* Assignee selection */}
