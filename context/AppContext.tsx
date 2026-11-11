@@ -25,6 +25,8 @@ import {
   MeetingRoom,
   ServiceLocation,
   CleaningTeam,
+  ServiceWorkflowPolicy,
+  ServiceWorkflowType,
 } from '@/types';
 import { addBusinessSlaDeadline } from '@/lib/mock-data';
 import {
@@ -44,6 +46,7 @@ import {
   MOCK_PURCHASE_REQUESTS,
   MOCK_NOTIFICATIONS,
   SERVICE_SLA_POLICIES,
+  SERVICE_WORKFLOW_POLICIES,
 } from '@/lib/mock-data';
 
 interface AppContextType {
@@ -62,6 +65,11 @@ interface AppContextType {
   // Tickets & Services
   tickets: Ticket[];
   serviceSlaPolicies: ServiceSlaPolicy[];
+  serviceWorkflowPolicies: ServiceWorkflowPolicy[];
+  updateServiceWorkflowPolicy: (serviceName: string, workflowType: ServiceWorkflowType) => void;
+  approveManagerWorkflow: (ticketId: string) => void;
+  submitTicketForRequesterApproval: (ticketId: string) => void;
+  respondToRequesterApproval: (ticketId: string, approved: boolean, note: string) => void;
   serviceSlaHistory: ServiceSlaChange[];
   updateServiceSlaPolicy: (serviceName: string, changes: { businessDays?: number; active?: boolean }) => void;
   selectedTicket: Ticket | null;
@@ -168,6 +176,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = getStoredData();
     return stored?.serviceSlaPolicies || SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true }));
   });
+  const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => getStoredData()?.serviceWorkflowPolicies || [...SERVICE_WORKFLOW_POLICIES]);
   const [serviceSlaHistory, setServiceSlaHistory] = useState<ServiceSlaChange[]>(() => getStoredData()?.serviceSlaHistory || []);
 
   const [selectedTicketId, setSelectedTicketIdState] = useState<string | null>(null);
@@ -232,6 +241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const payload = {
         tickets,
         serviceSlaPolicies,
+        serviceWorkflowPolicies,
         serviceSlaHistory,
         schedules,
         drivers,
@@ -250,7 +260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore
     }
-  }, [tickets, serviceSlaPolicies, serviceSlaHistory, schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, contracts, inventory, purchaseRequests, notifications, currentUser]);
+  }, [tickets, serviceSlaPolicies, serviceWorkflowPolicies, serviceSlaHistory, schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, contracts, inventory, purchaseRequests, notifications, currentUser]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -309,12 +319,57 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Configuração de SLA atualizada: ${serviceName}. Chamados existentes mantêm o prazo original.`);
   };
 
+  const updateServiceWorkflowPolicy = (serviceName: string, workflowType: ServiceWorkflowType) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { showToast('Apenas gestores podem alterar os fluxos.'); return; }
+    setServiceWorkflowPolicies((prev) => prev.map((policy) => policy.serviceName === serviceName ? { ...policy, workflowType } : policy));
+    showToast(`Fluxo do serviço ${serviceName} atualizado. A alteração vale para novos chamados.`);
+  };
+
+  const approveManagerWorkflow = (ticketId: string) => {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'manager') { showToast('Apenas gestores podem aprovar esta solicitação.'); return; }
+    const nowIso = new Date().toISOString();
+    setTickets((prev) => prev.map((ticket) => {
+      if (ticket.id !== ticketId || (ticket.workflowType || 1) !== 2 || ticket.status !== 'aguardando_aprovacao') return ticket;
+      return { ...ticket, status: 'concluido', completedAt: nowIso, history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Solicitação aprovada pelo gestor e concluída', performedBy: currentUser.name }] };
+    }));
+    showToast('Solicitação aprovada e concluída.');
+  };
+
+  const submitTicketForRequesterApproval = (ticketId: string) => {
+    if (!['admin', 'manager', 'attendant'].includes(currentUser.role)) { showToast('Apenas a equipe responsável pode encaminhar para aprovação.'); return; }
+    const nowIso = new Date().toISOString();
+    setTickets((prev) => prev.map((ticket) => {
+      if (ticket.id !== ticketId || (ticket.workflowType || 1) !== 3 || !['em_analise', 'em_andamento'].includes(ticket.status)) return ticket;
+      return { ...ticket, status: 'aguardando_aprovacao_solicitante', history: [...ticket.history, { id: `h-${Date.now()}`, timestamp: nowIso, action: 'Atendimento encaminhado ao solicitante para aprovação', performedBy: currentUser.name }] };
+    }));
+    showToast('Resultado encaminhado ao solicitante para aprovação.');
+  };
+
+  const respondToRequesterApproval = (ticketId: string, approved: boolean, note: string) => {
+    const ticket = tickets.find((item) => item.id === ticketId);
+    if (!ticket || ticket.workflowType !== 3 || ticket.status !== 'aguardando_aprovacao_solicitante') return;
+    if (ticket.requesterId !== currentUser.id) { showToast('Somente o solicitante pode responder a esta aprovação.'); return; }
+    if (!approved && !note.trim()) { showToast('Informe o que precisa ser revisto para solicitar nova análise.'); return; }
+    const nowIso = new Date().toISOString();
+    const action = approved ? 'Resultado aprovado pelo solicitante e chamado concluído' : 'Solicitante pediu ajustes; chamado retornou para nova análise';
+    setTickets((prev) => prev.map((item) => item.id !== ticketId ? item : {
+      ...item,
+      status: approved ? 'concluido' : 'em_analise',
+      completedAt: approved ? nowIso : undefined,
+      comments: note.trim() ? [...item.comments, { id: `c-${Date.now()}`, authorId: currentUser.id, authorName: currentUser.name, authorRole: currentUser.roleLabel, content: note.trim(), createdAt: nowIso, isInternal: false }] : item.comments,
+      history: [...item.history, { id: `h-${Date.now()}`, timestamp: nowIso, action, performedBy: currentUser.name, details: note.trim() || undefined }],
+    }));
+    showToast(approved ? 'Aprovação registrada e chamado concluído.' : 'Solicitação devolvida à equipe para nova análise.');
+  };
+
   const createTicket = (data: Partial<Ticket>): Ticket => {
     const nextNumber = tickets.length + 1025;
     const now = new Date();
     const nowIso = now.toISOString();
     const priority = data.priority || 'media';
     const serviceName = data.serviceName || 'Solicitação Geral';
+    const workflowType = serviceWorkflowPolicies.find((policy) => policy.serviceName === serviceName)?.workflowType || 1;
+    const initialStatus: TicketStatus = workflowType === 2 ? 'aguardando_aprovacao' : workflowType === 3 ? 'em_analise' : 'novo';
     const slaPolicy = serviceSlaPolicies.find((policy) => policy.serviceName === serviceName && policy.active);
     const slaBusinessDays = slaPolicy?.businessDays;
     const hours = slaBusinessDays ? slaBusinessDays * 10 : 0;
@@ -327,8 +382,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       description: data.description || '',
       category: data.category || 'atendimento',
       serviceName,
+      workflowType,
       priority,
-      status: 'novo',
+      status: initialStatus,
       requesterId: currentUser.id,
       requesterName: currentUser.name,
       requesterDepartment: currentUser.department,
@@ -371,6 +427,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateTicketStatus = (ticketId: string, status: TicketStatus, note?: string) => {
+    const target = tickets.find((ticket) => ticket.id === ticketId);
+    if (target && (target.workflowType || 1) !== 1) { showToast('Este chamado deve seguir as etapas de aprovação definidas para seu serviço.'); return; }
     const nowIso = new Date().toISOString();
     setTickets((prev) =>
       prev.map((t) => {
@@ -556,6 +614,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Ignore
     }
     setTickets(MOCK_TICKETS);
+    setServiceWorkflowPolicies([...SERVICE_WORKFLOW_POLICIES]);
     setServiceSlaPolicies(SERVICE_SLA_POLICIES.map((policy) => ({ ...policy, active: true })));
     setServiceSlaHistory([]);
     setSchedules(MOCK_SCHEDULES);
@@ -590,6 +649,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setSubTab,
         tickets,
         serviceSlaPolicies,
+        serviceWorkflowPolicies,
+        updateServiceWorkflowPolicy,
+        approveManagerWorkflow,
+        submitTicketForRequesterApproval,
+        respondToRequesterApproval,
         serviceSlaHistory,
         updateServiceSlaPolicy,
         selectedTicket,
