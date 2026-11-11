@@ -8,14 +8,14 @@ import { Truck, Car, Package, Send, Boxes, Mail } from 'lucide-react';
 type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'motoboy' | 'cargas' | 'malote';
 
 export const LogisticsModule: React.FC = () => {
-  const { vehicles, openNewTicketWithPrefill, serviceSlaPolicies } = useApp();
+  const { vehicles, openNewTicketWithPrefill, serviceSlaPolicies, serviceWorkflowPolicies } = useApp();
   const [activeSub, setActiveSub] = useState<LogisticsService>('motorista');
   const [origin, setOrigin] = useState('Sede Administrativa');
   const [destination, setDestination] = useState('');
   const [recipient, setRecipient] = useState('');
   const [deliveryType, setDeliveryType] = useState('Motoboy dedicado');
   const [selectedCorreiosService, setSelectedCorreiosService] = useState('Correios');
-  const correiosServices = serviceSlaPolicies.filter(policy => policy.category === 'Correios' && policy.active);
+  const correiosServices = serviceSlaPolicies.filter(policy => policy.active && policy.serviceName !== 'Motoboy' && serviceWorkflowPolicies.some(workflow => workflow.serviceName === policy.serviceName && workflow.category === 'Correios'));
   const effectiveCorreiosService = correiosServices.some(policy => policy.serviceName === selectedCorreiosService) ? selectedCorreiosService : (correiosServices[0]?.serviceName || '');
   const [notes, setNotes] = useState('');
 
@@ -56,7 +56,7 @@ export const LogisticsModule: React.FC = () => {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Frotas</h1>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Transporte</h1>
         <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
       </div>
 
