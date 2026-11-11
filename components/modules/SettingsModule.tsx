@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ServiceWorkflowType } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { Clock, Save, ToggleLeft, ToggleRight, History, ShieldAlert, Plus, Trash2 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
-  const { currentUser, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy,
+  const { currentUser, serviceWorkflowPolicies, updateServiceWorkflowPolicy, serviceSlaPolicies, serviceSlaHistory, updateServiceSlaPolicy,
     drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams,
     saveDriver, removeDriver, saveVehicle, removeVehicle, saveWaiter, removeWaiter,
     saveMeetingRoom, removeMeetingRoom, saveServiceLocation, removeServiceLocation,
@@ -76,6 +77,14 @@ export const SettingsModule: React.FC = () => {
           </div>)}
         </div>
       </section>
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div className="border-b px-4 py-3"><h2 className="text-sm font-semibold text-slate-900">Fluxos de atendimento por serviço</h2><p className="mt-1 text-xs text-slate-500">Defina como cada serviço será encaminhado. As alterações valem para novos chamados.</p></div>
+        <div className="overflow-x-auto"><table className="w-full text-left text-xs">
+          <thead><tr className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><th className="px-4 py-3">Módulo</th><th className="px-4 py-3">Serviço</th><th className="px-4 py-3">Tipo de atendimento</th></tr></thead>
+          <tbody className="divide-y divide-slate-100">{serviceWorkflowPolicies.map((policy) => <tr key={policy.serviceName}><td className="px-4 py-3 text-slate-500">{policy.category}</td><td className="px-4 py-3 font-medium text-slate-800">{policy.serviceName}</td><td className="px-4 py-3"><select aria-label={`Tipo de atendimento para ${policy.serviceName}`} value={policy.workflowType} onChange={(event) => updateServiceWorkflowPolicy(policy.serviceName, Number(event.target.value) as ServiceWorkflowType)} className="min-w-64 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700"><option value={1}>Tipo 1 — Atendimento direto</option><option value={2}>Tipo 2 — Aprovação do gestor</option><option value={3}>Tipo 3 — Aprovação do solicitante</option></select></td></tr>)}</tbody>
+        </table></div>
+      </section>
+
       <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-xs text-blue-900">
         <div className="flex items-center gap-2 font-semibold"><Clock className="h-4 w-4" /> Regra de contagem do SLA</div>
         <p className="mt-1">Dias úteis, de segunda a sexta-feira, das 08h às 18h, excluindo feriados nacionais e municipais de Belo Horizonte. Cada dia útil equivale a 10 horas de expediente.</p>
