@@ -941,6 +941,39 @@ export const MOCK_NOTIFICATIONS: NotificationItem[] = [
 
 
 // Prazos de atendimento definidos para os serviços da Central Administrativa.
+export const SERVICE_WORKFLOW_POLICIES = [
+  { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', workflowType: 2 },
+  { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', workflowType: 3 },
+  { category: 'Logística e Frotas', serviceName: 'Correios & Motoboy', workflowType: 1 },
+  { category: 'Logística e Frotas', serviceName: 'Correios', workflowType: 1 },
+  { category: 'Logística e Frotas', serviceName: 'Motoboy', workflowType: 1 },
+  { category: 'Logística e Frotas', serviceName: 'Transporte de Cargas', workflowType: 2 },
+  { category: 'Logística e Frotas', serviceName: 'Malote Corporativo', workflowType: 1 },
+  { category: 'Atendimento', serviceName: 'Limpeza & Higienização', workflowType: 2 },
+  { category: 'Atendimento', serviceName: 'Copa & Garçom', workflowType: 2 },
+  { category: 'Atendimento', serviceName: 'Vigilância & Portaria', workflowType: 2 },
+  { category: 'Atendimento', serviceName: 'Solicitações para Portaria', workflowType: 2 },
+  { category: 'Atendimento', serviceName: 'Serviços Externos', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', workflowType: 1 },
+  { category: 'Telefonia e Celular', serviceName: 'Solicitação de Linha Nova', workflowType: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Substituição de Aparelho Smartphone', workflowType: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Roaming Internacional', workflowType: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Chip Corporativo', workflowType: 2 },
+  { category: 'Telefonia e Celular', serviceName: 'Ramal / PABX', workflowType: 2 },
+  { category: 'Viagens e Passagens', serviceName: 'Passagens Aéreas', workflowType: 3 },
+  { category: 'Viagens e Passagens', serviceName: 'Reserva de Hotel / Hospedagem', workflowType: 3 },
+  { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', workflowType: 3 },
+  { category: 'Viagens e Passagens', serviceName: 'Seguro Viagem', workflowType: 1 },
+  { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', workflowType: 1 },
+  { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
+] as const;
+
 export const SERVICE_SLA_POLICIES = [
   { category: 'Logística e Frotas', serviceName: 'Motorista Executivo', businessDays: 2 },
   { category: 'Logística e Frotas', serviceName: 'Locação de Veículos', businessDays: 4 },
