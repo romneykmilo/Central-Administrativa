@@ -11,7 +11,7 @@ export const SettingsModule: React.FC = () => {
     saveDriver, removeDriver, saveVehicle, removeVehicle, saveWaiter, removeWaiter,
     saveMeetingRoom, removeMeetingRoom, saveServiceLocation, removeServiceLocation,
     saveCleaningTeam, removeCleaningTeam } = useApp();
-  const [masterTab, setMasterTab] = useState<'motoristas' | 'veiculos' | 'garcons' | 'salas' | 'locais' | 'equipes'>('motoristas');
+  const [masterTab, setMasterTab] = useState<'motoristas' | 'veiculos' | 'garcons' | 'salas' | 'locais' | 'equipes' | 'correios'>('motoristas');
   const [name, setName] = useState('');
   const [detail, setDetail] = useState('');
   const [extra, setExtra] = useState('');
@@ -27,6 +27,7 @@ export const SettingsModule: React.FC = () => {
     if (masterTab === 'salas') saveMeetingRoom({ id, name: name.trim(), capacity: Number(detail) || undefined, location: extra, active: true });
     if (masterTab === 'locais') saveServiceLocation({ id, name: name.trim(), description: detail, active: true });
     if (masterTab === 'equipes') saveCleaningTeam({ id, name: name.trim(), members: Number(detail) || undefined, active: true });
+    if (masterTab === 'correios') { addCorreiosService(name.trim(), Number(detail) || 1); resetMasterForm(); return; }
     resetMasterForm();
   };
   const editMaster = (item: any) => {
@@ -34,7 +35,7 @@ export const SettingsModule: React.FC = () => {
     setDetail(masterTab === 'motoristas' ? item.cnh : masterTab === 'veiculos' ? item.plate : masterTab === 'salas' ? String(item.capacity || '') : masterTab === 'equipes' ? String(item.members || '') : item.description || '');
     setExtra(masterTab === 'motoristas' ? item.phone : masterTab === 'veiculos' ? String(item.year) : item.location || '');
   };
-  const masterItems: any[] = masterTab === 'motoristas' ? drivers : masterTab === 'veiculos' ? vehicles : masterTab === 'garcons' ? waiters : masterTab === 'salas' ? meetingRooms : masterTab === 'locais' ? serviceLocations : cleaningTeams;
+  const masterItems: any[] = masterTab === 'motoristas' ? drivers : masterTab === 'veiculos' ? vehicles : masterTab === 'garcons' ? waiters : masterTab === 'salas' ? meetingRooms : masterTab === 'locais' ? serviceLocations : masterTab === 'equipes' ? cleaningTeams : serviceSlaPolicies.filter(policy => policy.category === 'Correios');
   const deleteMaster = (id: string) => {
     if (masterTab === 'motoristas') removeDriver(id);
     if (masterTab === 'veiculos') removeVehicle(id);
@@ -44,8 +45,6 @@ export const SettingsModule: React.FC = () => {
     if (masterTab === 'equipes') removeCleaningTeam(id);
   };
   const [draftDays, setDraftDays] = useState<Record<string, string>>({});
-  const [newCorreiosService, setNewCorreiosService] = useState('');
-  const [newCorreiosDays, setNewCorreiosDays] = useState('1');
   const canManage = currentUser.role === 'admin' || currentUser.role === 'manager';
 
   if (!canManage) {
@@ -63,19 +62,19 @@ export const SettingsModule: React.FC = () => {
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="border-b px-4 py-3"><h2 className="text-sm font-semibold text-slate-900">Cadastros centralizados</h2><p className="mt-1 text-xs text-slate-500">Dados reutilizados nos formulários de agendamento e operação.</p></div>
         <div className="flex flex-wrap gap-2 border-b p-3">
-          {([{id:'motoristas',label:'Motoristas'},{id:'veiculos',label:'Veículos'},{id:'garcons',label:'Garçons'},{id:'salas',label:'Salas de reunião'},{id:'locais',label:'Locais / ambientes'},{id:'equipes',label:'Equipes de limpeza'}] as const).map(tab => <button key={tab.id} onClick={() => {setMasterTab(tab.id);resetMasterForm();}} className={`rounded-md px-3 py-2 text-xs font-semibold ${masterTab===tab.id?'bg-slate-900 text-white':'bg-slate-100 text-slate-600'}`}>{tab.label}</button>)}
+          {([{id:'motoristas',label:'Motoristas'},{id:'veiculos',label:'Veículos'},{id:'garcons',label:'Garçons'},{id:'salas',label:'Salas de reunião'},{id:'locais',label:'Locais / ambientes'},{id:'equipes',label:'Equipes de limpeza'},{id:'correios',label:'Serviços dos Correios'}] as const).map(tab => <button key={tab.id} onClick={() => {setMasterTab(tab.id);resetMasterForm();}} className={`rounded-md px-3 py-2 text-xs font-semibold ${masterTab===tab.id?'bg-slate-900 text-white':'bg-slate-100 text-slate-600'}`}>{tab.label}</button>)}
         </div>
         <form onSubmit={submitMaster} className="grid gap-2 border-b bg-slate-50 p-3 sm:grid-cols-4">
-          <input required value={name} onChange={e=>setName(e.target.value)} placeholder={masterTab==='veiculos'?'Modelo do veículo':'Nome'} className="rounded-md border bg-white px-3 py-2 text-sm" />
-          {masterTab!=='garcons' && <input value={detail} onChange={e=>setDetail(e.target.value)} placeholder={masterTab==='motoristas'?'CNH':masterTab==='veiculos'?'Placa':masterTab==='salas'?'Capacidade':masterTab==='equipes'?'Quantidade de integrantes':'Descrição'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
+          <input required value={name} onChange={e=>setName(e.target.value)} placeholder={masterTab==='veiculos'?'Modelo do veículo':masterTab==='correios'?'Nome do serviço dos Correios':'Nome'} className="rounded-md border bg-white px-3 py-2 text-sm" />
+          {masterTab!=='garcons' && <input value={detail} onChange={e=>setDetail(e.target.value)} type={masterTab==='correios'?'number':'text'} min={masterTab==='correios'?1:undefined} max={masterTab==='correios'?365:undefined} placeholder={masterTab==='motoristas'?'CNH':masterTab==='veiculos'?'Placa':masterTab==='salas'?'Capacidade':masterTab==='equipes'?'Quantidade de integrantes':masterTab==='correios'?'Prazo em dias úteis':'Descrição'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
           {(masterTab==='motoristas'||masterTab==='veiculos'||masterTab==='salas') && <input value={extra} onChange={e=>setExtra(e.target.value)} placeholder={masterTab==='motoristas'?'Telefone':masterTab==='veiculos'?'Ano':'Localização'} className="rounded-md border bg-white px-3 py-2 text-sm" />}
-          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>{editingId?'Salvar alterações':'Adicionar cadastro'}</button>
+          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>{editingId?'Salvar alterações':masterTab==='correios'?'Adicionar serviço':'Adicionar cadastro'}</button>
           {editingId && <button type="button" onClick={resetMasterForm} className="text-xs text-slate-500">Cancelar edição</button>}
         </form>
         <div className="divide-y">
-          {masterItems.length===0 ? <p className="p-5 text-center text-sm text-slate-500">Nenhum cadastro realizado.</p> : masterItems.map(item => <div key={item.id} className="flex items-center justify-between gap-3 px-4 py-3">
-            <div><p className="text-sm font-medium text-slate-800">{item.name || item.model}</p><p className="text-xs text-slate-500">{masterTab==='motoristas'?item.cnh:masterTab==='veiculos'?item.plate:masterTab==='salas'?'Capacidade: '+(item.capacity||'—')+' · '+(item.location||''):masterTab==='equipes'?(item.members||'—')+' integrantes':masterTab==='locais'?item.description:item.shift}</p></div>
-            <div className="flex shrink-0 gap-2"><button onClick={()=>editMaster(item)} className="rounded border px-2 py-1 text-xs">Editar</button><button onClick={()=>deleteMaster(item.id)} className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-700"><Trash2 className="h-3 w-3"/></button></div>
+          {masterItems.length===0 ? <p className="p-5 text-center text-sm text-slate-500">{masterTab==='correios'?'Nenhum serviço dos Correios cadastrado.':'Nenhum cadastro realizado.'}</p> : masterItems.map(item => <div key={item.id || item.serviceName} className="flex items-center justify-between gap-3 px-4 py-3">
+            <div><p className="text-sm font-medium text-slate-800">{masterTab==='correios'?item.serviceName:(item.name || item.model)}</p><p className="text-xs text-slate-500">{masterTab==='correios'?('Prazo: '+item.businessDays+' dias úteis · '+(item.active?'Ativo':'Inativo')):masterTab==='motoristas'?item.cnh:masterTab==='veiculos'?item.plate:masterTab==='salas'?'Capacidade: '+(item.capacity||'—')+' · '+(item.location||''):masterTab==='equipes'?(item.members||'—')+' integrantes':masterTab==='locais'?item.description:item.shift}</p></div>
+            {masterTab!=='correios' && <div className="flex shrink-0 gap-2"><button onClick={()=>editMaster(item)} className="rounded border px-2 py-1 text-xs">Editar</button><button onClick={()=>deleteMaster(item.id)} className="rounded border border-rose-200 px-2 py-1 text-xs text-rose-700"><Trash2 className="h-3 w-3"/></button></div>}
           </div>)}
         </div>
       </section>
@@ -84,11 +83,6 @@ export const SettingsModule: React.FC = () => {
           <h2 className="text-sm font-semibold text-slate-900">Cadastro e configuração de serviços</h2>
           <p className="mt-1 text-xs text-slate-500">Gerencie em uma única tabela o fluxo de atendimento, o prazo e a disponibilidade de cada serviço.</p>
         </div>
-        <form onSubmit={event => { event.preventDefault(); addCorreiosService(newCorreiosService, Number(newCorreiosDays)); setNewCorreiosService(''); setNewCorreiosDays('1'); }} className="grid gap-2 border-b bg-slate-50 p-3 sm:grid-cols-[1fr_140px_auto]">
-          <input required value={newCorreiosService} onChange={event => setNewCorreiosService(event.target.value)} placeholder="Nome do novo serviço dos Correios" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" />
-          <input required type="number" min="1" max="365" value={newCorreiosDays} onChange={event => setNewCorreiosDays(event.target.value)} aria-label="Prazo em dias úteis" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" />
-          <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white"><Plus className="h-4 w-4"/>Adicionar serviço dos Correios</button>
-        </form>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead><tr className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
