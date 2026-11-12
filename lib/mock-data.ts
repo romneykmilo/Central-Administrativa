@@ -964,6 +964,7 @@ export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', workflowType: 3 },
   { category: 'Viagens e Passagens', serviceName: 'Seguro Viagem', workflowType: 1 },
   { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', workflowType: 1 },
+  { category: 'Viagens e Passagens', serviceName: 'Passagens Rodoviárias', workflowType: 3 },
 
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
   { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', workflowType: 1 },
@@ -993,6 +994,7 @@ export const SERVICE_SLA_POLICIES = [
   { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', businessDays: 4 },
   { category: 'Viagens e Passagens', serviceName: 'Seguro Viagem', businessDays: 2 },
   { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', businessDays: 2 },
+  { category: 'Viagens e Passagens', serviceName: 'Passagens Rodoviárias', businessDays: 2 },
   { category: 'Telefonia e Celular', serviceName: 'Solicitação de Linha Nova', businessDays: 1 },
   { category: 'Telefonia e Celular', serviceName: 'Substituição de Aparelho Smartphone', businessDays: 5 },
   { category: 'Telefonia e Celular', serviceName: 'Roaming Internacional', businessDays: 2 },
