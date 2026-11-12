@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { ScheduleAppointmentsFilter } from '@/components/modules/ScheduleAppointmentsFilter';
 import { ResourceType, ResourceSchedule } from '@/types';
 import { CalendarDays, Plus, Clock, MapPin, Users, AlertTriangle, CheckCircle2, X, Truck, Car, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -261,6 +262,11 @@ export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embedded
           </div>
         )}
       </div>
+
+      <ScheduleAppointmentsFilter
+        schedules={visibleSchedules}
+        title={embeddedResourceType === 'limpeza' ? 'Agendamentos de limpeza' : embeddedResourceType === 'garcom' ? 'Agendamentos de garçom' : embeddedDriverOnly ? 'Agendamentos de motorista' : 'Consulta de agendamentos'}
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3">
