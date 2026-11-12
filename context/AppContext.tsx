@@ -179,9 +179,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = getStoredData();
     const saved = stored?.serviceSlaPolicies as ServiceSlaPolicy[] | undefined;
     const legacy = saved?.find(policy => policy.serviceName === 'Correios & Motoboy');
-    const retiredMaintenanceServices = ["Climatização e Ar-Condicionado","Instalações Elétricas","Hidráulica Predial","Reparo Civil","Manutenção de Mobiliário","Manutenção Preventiva","Mudança de Layout"];
     const base = (saved || SERVICE_SLA_POLICIES.map(policy => ({ ...policy, active: true })))
-      .filter(policy => policy.serviceName !== 'Correios & Motoboy' && !retiredMaintenanceServices.includes(policy.serviceName));
+      .filter(policy => policy.serviceName !== 'Correios & Motoboy');
     const normalized = base.map(policy => ({
       ...policy,
       category: policy.category === 'Logística e Frotas' ? 'Logística e Transporte' :
@@ -201,8 +200,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
   const [serviceWorkflowPolicies, setServiceWorkflowPolicies] = useState<ServiceWorkflowPolicy[]>(() => {
     const saved = getStoredData()?.serviceWorkflowPolicies as ServiceWorkflowPolicy[] | undefined;
-    const retiredMaintenanceServices = ["Climatização e Ar-Condicionado","Instalações Elétricas","Hidráulica Predial","Reparo Civil","Manutenção de Mobiliário","Manutenção Preventiva","Mudança de Layout"];
-    const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy' && !retiredMaintenanceServices.includes(policy.serviceName));
+    const base = (saved || [...SERVICE_WORKFLOW_POLICIES]).filter(policy => policy.serviceName !== 'Correios & Motoboy');
     const normalized = base.map(policy => ({
       ...policy,
       category: ['Correios', 'Motoboy'].includes(policy.serviceName) ? 'Correios' :
