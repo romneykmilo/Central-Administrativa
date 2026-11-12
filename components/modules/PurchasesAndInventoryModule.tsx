@@ -49,7 +49,7 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
             Compras Corporativas
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Fluxo de requisições, aprovações financeiras e controle de saldo com estoque mínimo
+            Registro e acompanhamento de solicitações de cotação direta.
           </p>
         </div>
 
