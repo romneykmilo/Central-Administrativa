@@ -45,7 +45,7 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
       title: 'Manutenção Predial',
       subtitle: 'Solicitações de manutenção e conservação predial.',
       category: 'manutencao',
-      defaultService: 'Manutenção Predial',
+      defaultService: 'Climatização e Ar-Condicionado',
       icon: Wrench,
     },
     telefonia: {
