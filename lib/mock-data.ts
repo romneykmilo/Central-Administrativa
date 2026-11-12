@@ -964,10 +964,10 @@ export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Viagens e Passagens', serviceName: 'Locação de Veículo para Viagem', workflowType: 3 },
   { category: 'Viagens e Passagens', serviceName: 'Seguro Viagem', workflowType: 1 },
   { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', workflowType: 1 },
-  { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
-] as const;
 
+  { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
   { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', workflowType: 1 },
+] as const;
 
 export const SERVICE_SLA_POLICIES = [
   { category: 'Logística e Transporte', serviceName: 'Motorista Executivo', businessDays: 2 },
