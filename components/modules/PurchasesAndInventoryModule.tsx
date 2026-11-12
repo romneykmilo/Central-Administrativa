@@ -5,6 +5,7 @@ import { useApp } from '@/context/AppContext';
 import { ServiceTicketsFilter } from '@/components/modules/ServiceTicketsFilter';
 import {
   ShoppingBag,
+  Send,
   Boxes,
   Plus,
   Minus,
@@ -45,8 +46,13 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
 
   return (
     <div className="space-y-6">
+      {/* Ação principal do serviço */}
+      <button onClick={() => openNewTicketWithPrefill({ category: activeTab === 'compras' ? 'compras' : 'estoque', serviceName: 'Cotação Direta' })} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700">
+        <Send className="h-4 w-4" /> Nova solicitação
+      </button>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><ShoppingBag className="h-4 w-4" /></div>
@@ -59,18 +65,6 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
           </p>
         </div>
 
-        <button
-          onClick={() =>
-            openNewTicketWithPrefill({
-              category: activeTab === 'compras' ? 'compras' : 'estoque',
-              serviceName: 'Cotação Direta',
-            })
-          }
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Cotação Direta</span>
-        </button>
       </div>
 
       {/* Tabs */}
