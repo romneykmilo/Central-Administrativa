@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
 import { ServiceTicketsFilter } from '@/components/modules/ServiceTicketsFilter';
-import { Truck, Car, Package, Send, Boxes, Mail } from 'lucide-react';
+import { Truck, Car, Package, Send, Boxes, Mail, Plus } from 'lucide-react';
 
 type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'motoboy' | 'cargas' | 'malote';
 
@@ -64,6 +64,7 @@ export const LogisticsModule: React.FC = () => {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Transporte</h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
+        </div>
         </div>
         {activeSub !== 'motorista' && <button onClick={() => openNewTicketWithPrefill({ category: 'logistica', serviceName: activeSub === 'locacao' ? 'Locação de Veículos' : activeSub === 'correios' ? effectiveCorreiosService : activeSub === 'motoboy' ? 'Motoboy' : activeSub === 'cargas' ? 'Transporte de Cargas' : 'Malote Corporativo', priority: 'media' })} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700"><Plus className="h-4 w-4" /> Nova solicitação</button>}
       </div>
