@@ -31,6 +31,13 @@ export const AtendimentoModule: React.FC = () => {
     });
   };
 
+  const serviceTickets = tickets.filter(ticket => ticket.category === 'atendimento' && (
+    activeSub === 'limpeza' ? ticket.serviceName === 'Limpeza & Higienização' :
+    activeSub === 'garcom' ? ticket.serviceName === 'Copa & Garçom' :
+    activeSub === 'portaria' ? ticket.serviceName === 'Solicitações para Portaria' :
+    ticket.serviceName === 'Serviços Externos'
+  ));
+
   const tabs = [
     { id: 'limpeza' as const, label: 'Limpeza', icon: Brush },
     { id: 'garcom' as const, label: 'Garçom', icon: Coffee },
@@ -67,7 +74,8 @@ export const AtendimentoModule: React.FC = () => {
           <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
             Utilize o calendário para solicitar uma equipe de limpeza. Informe local, data e período de atendimento. A solicitação ficará pendente até aprovação da gestão; conflitos de equipe são verificados automaticamente. {getSlaLabel('Limpeza & Higienização')}
           </div>
-          <SchedulingModule embeddedResourceType="limpeza" />
+          <ServiceTicketsFilter tickets={serviceTickets} onSelectTicket={setSelectedTicketId} title="Chamados de Limpeza" />
+          <SchedulingModule embeddedResourceType="limpeza" hideAppointmentsFilter />
         </div>
       )}
 
@@ -76,7 +84,8 @@ export const AtendimentoModule: React.FC = () => {
           <div className="rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
             Solicite o atendimento de garçom para reuniões e eventos. Informe sala, data, horário e modalidade do serviço (montado ou volante). O pedido ficará pendente até aprovação e o sistema verificará a disponibilidade. {getSlaLabel('Copa & Garçom')}
           </div>
-          <SchedulingModule embeddedResourceType="garcom" />
+          <ServiceTicketsFilter tickets={serviceTickets} onSelectTicket={setSelectedTicketId} title="Chamados de Garçom" />
+          <SchedulingModule embeddedResourceType="garcom" hideAppointmentsFilter />
         </div>
       )}
 
@@ -137,16 +146,13 @@ export const AtendimentoModule: React.FC = () => {
           </div>
         </div>
       )}
-      <ServiceTicketsFilter
-        tickets={tickets.filter(ticket => ticket.category === 'atendimento' && (
-          activeSub === 'limpeza' ? ticket.serviceName === 'Limpeza & Higienização' :
-          activeSub === 'garcom' ? ticket.serviceName === 'Copa & Garçom' :
-          activeSub === 'portaria' ? ticket.serviceName === 'Solicitações para Portaria' :
-          ticket.serviceName === 'Serviços Externos'
-        ))}
-        onSelectTicket={setSelectedTicketId}
-        title={`Chamados de ${tabs.find(tab => tab.id === activeSub)?.label || 'Atendimento'}`}
-      />
+      {(activeSub === 'portaria' || activeSub === 'externos') && (
+        <ServiceTicketsFilter
+          tickets={serviceTickets}
+          onSelectTicket={setSelectedTicketId}
+          title={`Chamados de ${tabs.find(tab => tab.id === activeSub)?.label || 'Atendimento'}`}
+        />
+      )}
     </div>
   );
 };
