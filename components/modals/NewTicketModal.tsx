@@ -9,7 +9,7 @@ const servicesByCategory: Partial<Record<ServiceCategory, string[]>> = {
   logistica: ['Motorista Executivo', 'Locação de Veículos', 'Correios', 'Motoboy', 'Transporte de Cargas', 'Malote Corporativo'],
   atendimento: ['Limpeza & Higienização', 'Copa & Garçom', 'Vigilância & Portaria', 'Serviços Externos', 'Atendimento de Eventos', 'Solicitações para Portaria'],
   manutencao: ['Climatização e Ar-Condicionado', 'Instalações Elétricas', 'Hidráulica Predial', 'Reparo Civil', 'Manutenção de Mobiliário', 'Manutenção Preventiva', 'Mudança de Layout'],
-  viagens: ['Passagens Aéreas', 'Reserva de Hotel / Hospedagem', 'Locação de Veículo para Viagem', 'Seguro Viagem', 'Adiantamento de Diárias'],
+  viagens: ['Passagens Aéreas', 'Reserva de Hotel / Hospedagem', 'Locação de Veículo para Viagem', 'Seguro Viagem', 'Adiantamento de Diárias', 'Passagens Rodoviárias'],
   telefonia: ['Solicitação de Linha Nova', 'Substituição de Aparelho Smartphone', 'Roaming Internacional', 'Chip Corporativo', 'Ramal / PABX'],
   compras: ['Cotação Direta'],
 };
