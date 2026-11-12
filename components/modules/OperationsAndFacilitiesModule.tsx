@@ -18,6 +18,15 @@ import {
   Coffee,
   Shield,
   Sparkles,
+  PlaneTakeoff,
+  Hotel,
+  CarFront,
+  ShieldCheck,
+  BusFront,
+  Smartphone,
+  Globe,
+  SimCard,
+  Headset,
 } from 'lucide-react';
 
 interface Props {
@@ -29,24 +38,24 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
 
   const activeModule = initialType;
   const serviceTabs = initialType === 'manutencao'
-    ? [{ id: 'Climatização e Ar-Condicionado', label: 'Manutenção Predial' }]
+    ? [{ id: 'Climatização e Ar-Condicionado', label: 'Manutenção Predial', icon: Wrench }]
     : initialType === 'viagens'
       ? [
-          { id: 'Passagens Aéreas', label: 'Passagens Aéreas' },
-          { id: 'Reserva de Hotel / Hospedagem', label: 'Hospedagem' },
-          { id: 'Locação de Veículo para Viagem', label: 'Locação de Veículo para Viagem' },
-          { id: 'Seguro Viagem', label: 'Seguro Viagem' },
-          { id: 'Adiantamento de Diárias', label: 'Adiantamento de Viagem' },
-          { id: 'Passagens Rodoviárias', label: 'Passagens Rodoviárias' },
+          { id: 'Passagens Aéreas', label: 'Passagens Aéreas', icon: PlaneTakeoff },
+          { id: 'Reserva de Hotel / Hospedagem', label: 'Hospedagem', icon: Hotel },
+          { id: 'Locação de Veículo para Viagem', label: 'Locação de Veículo para Viagem', icon: CarFront },
+          { id: 'Seguro Viagem', label: 'Seguro Viagem', icon: ShieldCheck },
+          { id: 'Adiantamento de Diárias', label: 'Adiantamento de Viagem', icon: CreditCard },
+          { id: 'Passagens Rodoviárias', label: 'Passagens Rodoviárias', icon: BusFront },
         ]
       : initialType === 'telefonia'
         ? [
-            { id: '__geral', label: 'Telefonia' },
-            { id: 'Solicitação de Linha Nova', label: 'Solicitação de Linha Nova' },
-            { id: 'Substituição de Aparelho Smartphone', label: 'Substituição de Aparelho Smartphone' },
-            { id: 'Roaming Internacional', label: 'Roaming Internacional' },
-            { id: 'Chip Corporativo', label: 'Chip Corporativo' },
-            { id: 'Ramal / PABX', label: 'Ramal / PABX' },
+            { id: '__geral', label: 'Telefonia', icon: PhoneCall },
+            { id: 'Solicitação de Linha Nova', label: 'Solicitação de Linha Nova', icon: Smartphone },
+            { id: 'Substituição de Aparelho Smartphone', label: 'Substituição de Aparelho Smartphone', icon: Smartphone },
+            { id: 'Roaming Internacional', label: 'Roaming Internacional', icon: Globe },
+            { id: 'Chip Corporativo', label: 'Chip Corporativo', icon: SimCard },
+            { id: 'Ramal / PABX', label: 'Ramal / PABX', icon: Headset },
           ]
         : [];
   const [activeService, setActiveService] = useState(
@@ -152,6 +161,7 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
+                {tab.icon && <tab.icon className="h-4 w-4" />}
                 <span>{tab.label}</span>
               </button>
             );
