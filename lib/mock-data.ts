@@ -993,9 +993,8 @@ export const SERVICE_SLA_POLICIES = [
   { category: 'Telefonia e Celular', serviceName: 'Chip Corporativo', businessDays: 2 },
   { category: 'Telefonia e Celular', serviceName: 'Ramal / PABX', businessDays: 1 },
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', businessDays: 4 },
-] as const;
-
   { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', businessDays: 5 },
+] as const;
 
 const normalizeServiceName = (value: string) =>
   value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
