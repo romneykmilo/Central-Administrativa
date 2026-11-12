@@ -47,7 +47,8 @@ export const AtendimentoModule: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
           <Users className="h-5 w-5" />
         </div>
@@ -55,6 +56,7 @@ export const AtendimentoModule: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Atendimento</h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">Limpeza, copa, portaria e serviços externos. Selecione o atendimento para consultar as orientações e fazer sua solicitação.</p>
         </div>
+        {(activeSub === 'portaria' || activeSub === 'externos') && <button onClick={() => openNewTicketWithPrefill({ category: 'atendimento', serviceName: activeSub === 'portaria' ? 'Solicitações para Portaria' : 'Serviços Externos', priority: 'media' })} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700"><Send className="h-4 w-4" /> Nova solicitação</button>}
       </div>
       <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
         {tabs.map(tab => {
