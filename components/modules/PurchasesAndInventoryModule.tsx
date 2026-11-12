@@ -46,7 +46,7 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            {activeTab === 'compras' ? 'Compras Corporativas & Suprimentos' : 'Estoque & Almoxarifado'}
+            Compras Corporativas
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Fluxo de requisições, aprovações financeiras e controle de saldo com estoque mínimo
@@ -57,13 +57,13 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
           onClick={() =>
             openNewTicketWithPrefill({
               category: activeTab === 'compras' ? 'compras' : 'estoque',
-              serviceName: activeTab === 'compras' ? 'Compras Corporativas' : 'Reposição de Almoxarifado',
+              serviceName: 'Cotação Direta',
             })
           }
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>{activeTab === 'compras' ? 'Nova Solicitação de Compra' : 'Solicitar Material'}</span>
+          <span>Nova Cotação Direta</span>
         </button>
       </div>
 
@@ -78,20 +78,9 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
           }`}
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>Solicitações de Compra ({purchaseRequests.length})</span>
+          <span>Cotações Diretas ({purchaseRequests.length})</span>
         </button>
 
-        <button
-          onClick={() => setActiveTab('estoque')}
-          className={`flex items-center gap-1.5 px-3 py-2 border-b-2 font-medium transition-colors ${
-            activeTab === 'estoque'
-              ? 'border-blue-600 text-blue-600 font-bold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Boxes className="w-4 h-4" />
-          <span>Almoxarifado & Estoque ({inventory.length} itens)</span>
-        </button>
       </div>
 
       {/* PURCHASES VIEW */}
