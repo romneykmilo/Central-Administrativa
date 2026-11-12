@@ -55,9 +55,14 @@ export const LogisticsModule: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Transporte</h1>
-        <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <Truck className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Transporte</h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
+        </div>
       </div>
 
       <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
