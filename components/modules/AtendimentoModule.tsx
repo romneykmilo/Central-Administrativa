@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
+import { ServiceTicketsFilter } from '@/components/modules/ServiceTicketsFilter';
 import { Brush, Coffee, ShieldCheck, Package, Send, Users } from 'lucide-react';
 
 type AttendanceService = 'limpeza' | 'garcom' | 'portaria' | 'externos';
 
 export const AtendimentoModule: React.FC = () => {
-  const { openNewTicketWithPrefill, serviceSlaPolicies } = useApp();
+  const { tickets, openNewTicketWithPrefill, serviceSlaPolicies, setSelectedTicketId } = useApp();
   const [activeSub, setActiveSub] = useState<AttendanceService>('limpeza');
   const [requestDetails, setRequestDetails] = useState('');
   const [location, setLocation] = useState('Sede Administrativa');
@@ -136,6 +137,16 @@ export const AtendimentoModule: React.FC = () => {
           </div>
         </div>
       )}
+      <ServiceTicketsFilter
+        tickets={tickets.filter(ticket => ticket.category === 'atendimento' && (
+          activeSub === 'limpeza' ? ticket.serviceName === 'Limpeza & Higienização' :
+          activeSub === 'garcom' ? ticket.serviceName === 'Copa & Garçom' :
+          activeSub === 'portaria' ? ticket.serviceName === 'Solicitações para Portaria' :
+          ticket.serviceName === 'Serviços Externos'
+        ))}
+        onSelectTicket={setSelectedTicketId}
+        title={`Chamados de ${tabs.find(tab => tab.id === activeSub)?.label || 'Atendimento'}`}
+      />
     </div>
   );
 };
