@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { ServiceTicketsFilter } from '@/components/modules/ServiceTicketsFilter';
 import {
   ShoppingBag,
   Boxes,
@@ -23,12 +24,14 @@ interface Props {
 export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'compras' }) => {
   const {
     purchaseRequests,
+    tickets,
     inventory,
     approvePurchaseRequest,
     rejectPurchaseRequest,
     updateInventoryStock,
     currentUser,
     openNewTicketWithPrefill,
+    setSelectedTicketId,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'compras' | 'estoque'>(initialTab);
@@ -224,6 +227,11 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
           </div>
         </div>
       )}
+      <ServiceTicketsFilter
+        tickets={tickets.filter(ticket => ticket.category === 'compras' && ticket.serviceName === 'Cotação Direta')}
+        onSelectTicket={setSelectedTicketId}
+        title="Chamados de Cotação Direta"
+      />
     </div>
   );
 };
