@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { ScheduleAppointmentsFilter } from '@/components/modules/ScheduleAppointmentsFilter';
 import { ResourceType, ResourceSchedule } from '@/types';
-import { CalendarDays, Plus, Clock, MapPin, Users, AlertTriangle, CheckCircle2, X, Truck, Car, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarDays, Send, Clock, MapPin, Users, AlertTriangle, CheckCircle2, X, Truck, Car, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type CalendarMode = 'dia' | 'semana' | 'mes' | 'lista';
 const pad = (value: number) => String(value).padStart(2, '0');
@@ -198,14 +198,14 @@ export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embedded
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-start gap-3">
+        <button onClick={() => openModal(activeTab)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700">
+          <Send className="h-4 w-4" /> Nova solicitação
+        </button>
         {!embeddedDriverOnly && !embeddedResourceType && <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agendamentos de Recursos</h1>
           <p className="mt-1 text-sm text-slate-500">Solicitações de motorista, garçom e limpeza, sujeitas à aprovação da gestão.</p>
         </div>}
-        <button onClick={() => openModal(activeTab)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          <Plus className="h-4 w-4" /> {embeddedResourceType === 'limpeza' ? 'Solicitar equipe de limpeza' : embeddedResourceType === 'garcom' ? 'Solicitar garçom' : embeddedDriverOnly ? 'Solicitar motorista' : 'Novo agendamento'}
-        </button>
       </div>
 
       {!embeddedDriverOnly && !embeddedResourceType && (
