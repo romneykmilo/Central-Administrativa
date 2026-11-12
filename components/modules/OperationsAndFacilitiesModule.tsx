@@ -48,7 +48,9 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
             { id: 'Ramal / PABX', label: 'Ramal / PABX' },
           ]
         : [];
-  const [activeService, setActiveService] = useState(serviceTabs[0]?.id || moduleMeta[initialType]?.defaultService || '');
+  const [activeService, setActiveService] = useState(
+    serviceTabs[0]?.id || (initialType === 'manutencao' ? 'Climatização e Ar-Condicionado' : '')
+  );
 
   const moduleMeta: Record<
     string,
