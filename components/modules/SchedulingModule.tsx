@@ -13,7 +13,7 @@ const localDateTime = (date: string, time: string) => new Date(`${date}T${time}:
 const plusMinutes = (date: Date, minutes: number) => new Date(date.getTime() + minutes * 60000);
 const formatTime = (value?: string) => value ? new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
-export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embeddedResourceType?: 'motorista' | 'garcom' | 'limpeza' }> = ({ embeddedDriverOnly = false, embeddedResourceType }) => {
+export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embeddedResourceType?: 'motorista' | 'garcom' | 'limpeza'; hideAppointmentsFilter?: boolean }> = ({ embeddedDriverOnly = false, embeddedResourceType, hideAppointmentsFilter = false }) => {
   const { schedules, drivers, vehicles, waiters, meetingRooms, serviceLocations, cleaningTeams, createSchedule, cancelSchedule, approveSchedule, rejectSchedule, currentUser } = useApp();
   const [viewMode, setViewMode] = useState<CalendarMode>('mes');
   const [activeTab, setActiveTab] = useState<'motorista' | 'garcom' | 'limpeza'>(embeddedResourceType || 'motorista');
@@ -263,10 +263,10 @@ export const SchedulingModule: React.FC<{ embeddedDriverOnly?: boolean; embedded
         )}
       </div>
 
-      <ScheduleAppointmentsFilter
+      {!hideAppointmentsFilter && <ScheduleAppointmentsFilter
         schedules={visibleSchedules}
         title={embeddedResourceType === 'limpeza' ? 'Agendamentos de limpeza' : embeddedResourceType === 'garcom' ? 'Agendamentos de garçom' : embeddedDriverOnly ? 'Agendamentos de motorista' : 'Consulta de agendamentos'}
-      />
+      />}
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-3">
