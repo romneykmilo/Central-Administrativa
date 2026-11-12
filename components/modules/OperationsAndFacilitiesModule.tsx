@@ -18,15 +18,11 @@ import {
   Coffee,
   Shield,
   Sparkles,
-  PlaneTakeoff,
-  Hotel,
-  CarFront,
-  ShieldCheck,
-  BusFront,
+  Car,
   Smartphone,
   Globe,
-  SimCard,
-  Headset,
+  Bus,
+  Hotel,
 } from 'lucide-react';
 
 interface Props {
@@ -41,12 +37,12 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
     ? [{ id: 'Climatização e Ar-Condicionado', label: 'Manutenção Predial', icon: Wrench }]
     : initialType === 'viagens'
       ? [
-          { id: 'Passagens Aéreas', label: 'Passagens Aéreas', icon: PlaneTakeoff },
+          { id: 'Passagens Aéreas', label: 'Passagens Aéreas', icon: Plane },
           { id: 'Reserva de Hotel / Hospedagem', label: 'Hospedagem', icon: Hotel },
-          { id: 'Locação de Veículo para Viagem', label: 'Locação de Veículo para Viagem', icon: CarFront },
-          { id: 'Seguro Viagem', label: 'Seguro Viagem', icon: ShieldCheck },
+          { id: 'Locação de Veículo para Viagem', label: 'Locação de Veículo para Viagem', icon: Car },
+          { id: 'Seguro Viagem', label: 'Seguro Viagem', icon: Shield },
           { id: 'Adiantamento de Diárias', label: 'Adiantamento de Viagem', icon: CreditCard },
-          { id: 'Passagens Rodoviárias', label: 'Passagens Rodoviárias', icon: BusFront },
+          { id: 'Passagens Rodoviárias', label: 'Passagens Rodoviárias', icon: Bus },
         ]
       : initialType === 'telefonia'
         ? [
@@ -54,8 +50,8 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
             { id: 'Solicitação de Linha Nova', label: 'Solicitação de Linha Nova', icon: Smartphone },
             { id: 'Substituição de Aparelho Smartphone', label: 'Substituição de Aparelho Smartphone', icon: Smartphone },
             { id: 'Roaming Internacional', label: 'Roaming Internacional', icon: Globe },
-            { id: 'Chip Corporativo', label: 'Chip Corporativo', icon: SimCard },
-            { id: 'Ramal / PABX', label: 'Ramal / PABX', icon: Headset },
+            { id: 'Chip Corporativo', label: 'Chip Corporativo', icon: CreditCard },
+            { id: 'Ramal / PABX', label: 'Ramal / PABX', icon: PhoneCall },
           ]
         : [];
   const [activeService, setActiveService] = useState(
