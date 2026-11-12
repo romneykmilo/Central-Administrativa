@@ -966,7 +966,13 @@ export const SERVICE_WORKFLOW_POLICIES = [
   { category: 'Viagens e Passagens', serviceName: 'Adiantamento de Diárias', workflowType: 1 },
 
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', workflowType: 1 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', workflowType: 1 },
+  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', workflowType: 1 },
 ] as const;
 
 export const SERVICE_SLA_POLICIES = [
@@ -993,7 +999,13 @@ export const SERVICE_SLA_POLICIES = [
   { category: 'Telefonia e Celular', serviceName: 'Chip Corporativo', businessDays: 2 },
   { category: 'Telefonia e Celular', serviceName: 'Ramal / PABX', businessDays: 1 },
   { category: 'Compras Corporativas', serviceName: 'Cotação Direta', businessDays: 4 },
-  { category: 'Manutenção Predial', serviceName: 'Manutenção Predial', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Climatização e Ar-Condicionado', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Instalações Elétricas', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Hidráulica Predial', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Reparo Civil', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção de Mobiliário', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Manutenção Preventiva', businessDays: 5 },
+  { category: 'Manutenção Predial', serviceName: 'Mudança de Layout', businessDays: 5 },
 ] as const;
 
 const normalizeServiceName = (value: string) =>
