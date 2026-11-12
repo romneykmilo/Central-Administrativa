@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
-import { Brush, Coffee, ShieldCheck, Package, Send } from 'lucide-react';
+import { Brush, Coffee, ShieldCheck, Package, Send, Users } from 'lucide-react';
 
 type AttendanceService = 'limpeza' | 'garcom' | 'portaria' | 'externos';
 
@@ -39,12 +39,15 @@ export const AtendimentoModule: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Atendimento</h1>
-        <p className="mt-1 text-xs sm:text-sm text-slate-500">Limpeza, copa, portaria e serviços externos. Selecione o atendimento para consultar as orientações e fazer sua solicitação.</p>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <Users className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Atendimento</h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">Limpeza, copa, portaria e serviços externos. Selecione o atendimento para consultar as orientações e fazer sua solicitação.</p>
+        </div>
       </div>
-
-      <div className="pt-1"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Atendimento (Limpeza, copa, portaria)</p></div>
       <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
         {tabs.map(tab => {
           const Icon = tab.icon;
