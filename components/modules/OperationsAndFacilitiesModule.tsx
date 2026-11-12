@@ -26,9 +26,29 @@ interface Props {
 export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) => {
   const { tickets, openNewTicketWithPrefill, setSelectedTicketId } = useApp();
 
-  const [activeModule, setActiveModule] = useState<
-    'atendimento' | 'manutencao' | 'telefonia' | 'viagens' | 'pagamentos'
-  >(initialType);
+  const activeModule = initialType;
+  const serviceTabs = initialType === 'manutencao'
+    ? [{ id: 'Climatização e Ar-Condicionado', label: 'Manutenção Predial' }]
+    : initialType === 'viagens'
+      ? [
+          { id: 'Passagens Aéreas', label: 'Passagens Aéreas' },
+          { id: 'Reserva de Hotel / Hospedagem', label: 'Hospedagem' },
+          { id: 'Locação de Veículo para Viagem', label: 'Locação de Veículo para Viagem' },
+          { id: 'Seguro Viagem', label: 'Seguro Viagem' },
+          { id: 'Adiantamento de Diárias', label: 'Adiantamento de Viagem' },
+          { id: 'Passagens Rodoviárias', label: 'Passagens Rodoviárias' },
+        ]
+      : initialType === 'telefonia'
+        ? [
+            { id: '__geral', label: 'Telefonia' },
+            { id: 'Solicitação de Linha Nova', label: 'Solicitação de Linha Nova' },
+            { id: 'Substituição de Aparelho Smartphone', label: 'Substituição de Aparelho Smartphone' },
+            { id: 'Roaming Internacional', label: 'Roaming Internacional' },
+            { id: 'Chip Corporativo', label: 'Chip Corporativo' },
+            { id: 'Ramal / PABX', label: 'Ramal / PABX' },
+          ]
+        : [];
+  const [activeService, setActiveService] = useState(serviceTabs[0]?.id || moduleMeta[initialType]?.defaultService || '');
 
   const moduleMeta: Record<
     string,
@@ -74,7 +94,12 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
   const current = moduleMeta[activeModule] || moduleMeta.atendimento;
   const Icon = current.icon;
 
-  const relevantTickets = tickets.filter((t) => t.category === activeModule);
+  const relevantTickets = tickets.filter((t) =>
+    t.category === activeModule &&
+    (activeModule === 'manutencao' || activeService === '__geral' || t.serviceName === activeService)
+  );
+  const selectedService = activeService === '__geral' ? current.defaultService : activeService;
+  const serviceLabel = serviceTabs.find(tab => tab.id === activeService)?.label || selectedService;
 
   return (
     <div className="space-y-6">
@@ -94,7 +119,7 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
           onClick={() =>
             openNewTicketWithPrefill({
               category: current.category as any,
-              serviceName: current.defaultService,
+              serviceName: selectedService,
             })
           }
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-xs transition-colors shrink-0"
@@ -104,33 +129,32 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
         </button>
       </div>
 
-      {/* Module Switcher Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-1 text-xs font-semibold overflow-x-auto">
-        {[
-          { id: 'atendimento', label: 'Atendimento & Copa', icon: Users },
-          { id: 'manutencao', label: 'Manutenção Predial', icon: Wrench },
-          { id: 'telefonia', label: 'Telefonia & Chips', icon: PhoneCall },
-          { id: 'viagens', label: 'Viagens & Passagens', icon: Plane },
-          { id: 'pagamentos', label: 'Pagamentos & Contas', icon: CreditCard },
-        ].map((tab) => {
-          const TabIcon = tab.icon;
-          const isSel = activeModule === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveModule(tab.id as any)}
-              className={`flex items-center gap-1.5 px-3 py-2 border-b-2 font-medium transition-colors whitespace-nowrap ${
-                isSel
-                  ? 'border-blue-600 text-blue-600 font-bold'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <TabIcon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Abas específicas do módulo */}
+      {serviceTabs.length > 0 && (
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-1 text-xs font-semibold overflow-x-auto">
+          {serviceTabs.map((tab) => {
+            const isSel = activeService === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveService(tab.id);
+                  if (tab.id !== '__geral') {
+                    // A solicitação será aberta já vinculada ao serviço selecionado.
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 border-b-2 font-medium transition-colors whitespace-nowrap ${
+                  isSel
+                    ? 'border-blue-600 text-blue-600 font-bold'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Custom Cards for Specific Modules */}
       {activeModule === 'telefonia' && (
@@ -177,7 +201,7 @@ export const OperationsAndFacilitiesModule: React.FC<Props> = ({ initialType }) 
       <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
         <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">
-            Demandas e Chamados de {current.title.split(',')[0]} ({relevantTickets.length})
+            Demandas e Chamados de {serviceLabel} ({relevantTickets.length})
           </h3>
           <span className="text-xs text-slate-500 font-mono">Filtro por categoria</span>
         </div>
