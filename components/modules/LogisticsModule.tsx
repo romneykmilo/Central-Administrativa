@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { SchedulingModule } from '@/components/modules/SchedulingModule';
+import { ServiceTicketsFilter } from '@/components/modules/ServiceTicketsFilter';
 import { Truck, Car, Package, Send, Boxes, Mail } from 'lucide-react';
 
 type LogisticsService = 'motorista' | 'locacao' | 'correios' | 'motoboy' | 'cargas' | 'malote';
 
 export const LogisticsModule: React.FC = () => {
-  const { vehicles, openNewTicketWithPrefill, serviceSlaPolicies, serviceWorkflowPolicies } = useApp();
+  const { tickets, vehicles, openNewTicketWithPrefill, serviceSlaPolicies, serviceWorkflowPolicies, setSelectedTicketId } = useApp();
   const [activeSub, setActiveSub] = useState<LogisticsService>('motorista');
   const [origin, setOrigin] = useState('Sede Administrativa');
   const [destination, setDestination] = useState('');
@@ -156,6 +157,18 @@ export const LogisticsModule: React.FC = () => {
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="text-[11px] text-slate-500">{getSlaLabel('Malote Corporativo')}</span><button onClick={()=>requestTicket('Malote Corporativo','Solicitação de malote corporativo','Informe unidade/setor de origem e destino, destinatário e contato, descrição e quantidade de volumes, data desejada e orientações especiais de entrega.')} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Solicitar malote <Send className="h-4 w-4"/></button></div>
         </div>
       )}
+      <ServiceTicketsFilter
+        tickets={tickets.filter(ticket => ticket.category === 'logistica' && (
+          activeSub === 'motorista' ? ticket.serviceName === 'Agendamento de Motorista' :
+          activeSub === 'locacao' ? ticket.serviceName === 'Locação de Veículos' :
+          activeSub === 'correios' ? ticket.serviceName === effectiveCorreiosService :
+          activeSub === 'motoboy' ? ticket.serviceName === 'Motoboy' :
+          activeSub === 'cargas' ? ticket.serviceName === 'Transporte de Cargas' :
+          ticket.serviceName === 'Malote Corporativo'
+        ))}
+        onSelectTicket={setSelectedTicketId}
+        title={`Chamados de ${tabs.find(tab => tab.id === activeSub)?.label || 'Logística'}`}
+      />
     </div>
   );
 };
