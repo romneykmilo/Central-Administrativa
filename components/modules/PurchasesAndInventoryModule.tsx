@@ -48,9 +48,12 @@ export const PurchasesAndInventoryModule: React.FC<Props> = ({ initialTab = 'com
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600"><ShoppingBag className="h-4 w-4" /></div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
             Compras Corporativas
-          </h1>
+            </h1>
+          </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Registro e acompanhamento de solicitações de cotação direta.
           </p>
