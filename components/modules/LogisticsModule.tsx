@@ -56,7 +56,8 @@ export const LogisticsModule: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
           <Truck className="h-5 w-5" />
         </div>
@@ -64,6 +65,7 @@ export const LogisticsModule: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Logística e Transporte</h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-500">Selecione o serviço desejado para consultar as orientações e registrar sua solicitação.</p>
         </div>
+        {activeSub !== 'motorista' && <button onClick={() => openNewTicketWithPrefill({ category: 'logistica', serviceName: activeSub === 'locacao' ? 'Locação de Veículos' : activeSub === 'correios' ? effectiveCorreiosService : activeSub === 'motoboy' ? 'Motoboy' : activeSub === 'cargas' ? 'Transporte de Cargas' : 'Malote Corporativo', priority: 'media' })} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-700"><Plus className="h-4 w-4" /> Nova solicitação</button>}
       </div>
 
       <div className="flex gap-1 overflow-x-auto border-b border-slate-200">
